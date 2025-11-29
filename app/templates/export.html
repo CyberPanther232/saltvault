@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Export Passwords{% endblock %}
+
+{% block content %}
+<h2>Export Passwords</h2>
+<p>
+    For your security, please re-enter your master password and MFA code to export your data.
+</p>
+<form method="POST" action="{{ url_for('main.export_passwords') }}">
+    <div class="form-group">
+        <label for="password">Master Password</label>
+        <input type="password" class="form-control" id="password" name="password" required>
+    </div>
+    <div class="form-group">
+        <label for="totp">MFA Code</label>
+        <input type="text" class="form-control" id="totp" name="totp" required>
+    </div>
+    <button type="submit" class="btn btn-danger">Export Data</button>
+    <a href="{{ url_for('main.index_route') }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

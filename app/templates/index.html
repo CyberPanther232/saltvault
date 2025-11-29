@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}SaltVault - Dashboard{% endblock %}
+
+{% block content %}
+    <div class="watermarked">
+        <div class="quote-box">
+            <p>{{ quote }}</p>
+        </div>
+
+        <h2>Password Manager</h2>
+
+        <a href="{{ url_for('main.add_password') }}" class="btn btn-primary mb-3">Add Password</a>
+        <a href="{{ url_for('main.export_passwords') }}" class="btn btn-secondary mb-3">Export to CSV</a>
+        
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Password</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for password in passwords %}
+                <tr class="password-row">
+                    <td>{{ password.title }}</td>
+                    <td>{{ password.username }}</td>
+                    <td>{{ password.email }}</td>
+                    <td>
+                        <span id="password-{{ password.id }}" class="decrypted-password">**********</span>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-info toggle-password-visibility" data-id="{{ password.id }}">View</button>
+                        <a href="{{ url_for('main.edit_password', password_id=password.id) }}" class="btn btn-sm btn-warning">Edit</a>
+                        <form action="{{ url_for('main.delete_password', password_id=password.id) }}" method="POST" style="display: inline-block;">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this password?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                <tr class="notes-row" id="notes-row-{{ password.id }}" style="display: none;">
+                    <td colspan="5">
+                        <strong>Notes:</strong>
+                        <p id="notes-content-{{ password.id }}"></p>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5">No passwords found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleButtons = document.querySelectorAll('.toggle-password-visibility');
+
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const passwordId = this.getAttribute('data-id');
+            const passwordSpan = document.getElementById(`password-${passwordId}`);
+            const notesRow = document.getElementById(`notes-row-${passwordId}`);
+            const notesContent = document.getElementById(`notes-content-${passwordId}`);
+
+            if (this.textContent === 'View') {
+                passwordSpan.textContent = 'Loading...';
+                notesContent.textContent = 'Loading...';
+
+                fetch(`/view-password/${passwordId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.password) {
+                            passwordSpan.textContent = data.password;
+                            notesContent.textContent = data.notes || 'No notes for this entry.';
+                            notesRow.style.display = 'table-row';
+                            this.textContent = 'Hide';
+                        } else {
+                            passwordSpan.textContent = 'Error';
+                            notesContent.textContent = 'Error';
+                            console.error('Error:', data.error || 'Could not retrieve password.');
+                        }
+                    })
+                    .catch(error => {
+                        passwordSpan.textContent = 'Error';
+                        notesContent.textContent = 'Error';
+                        console.error('There has been a problem with your fetch operation:', error);
+                    });
+            } else {
+                passwordSpan.textContent = '**********';
+                notesRow.style.display = 'none';
+                this.textContent = 'View';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

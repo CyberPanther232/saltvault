@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}SaltVault - MFA Login{% endblock %}
+
+{% block content %}
+    <h2>Enter MFA Code</h2>
+    <form method="post">
+        <div class="form-group">
+            <label for="totp">Enter TOTP from your app</label>
+            <input type="text" id="totp" name="totp" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Verify</button>
+    </form>
+{% endblock %}

@@ -1,0 +1,23 @@
+# Virtual Environment
+.env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Database files
+*.db
+
+# Environment file
+app.env
+
+# Log files
+/logs/
+
+# SSL Certificates
+/nginx/certs/
+
+# Editor backup files
+*~
+*#
+.DS_Store
