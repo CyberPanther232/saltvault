@@ -483,12 +483,18 @@ def change_password():
     if request.method == 'POST':
         old_password = request.form['old_password']
         new_password = request.form['new_password']
+        new_password_confirm = request.form['confirm_password']
         
         if not check_password_hash(current_user.password_hash, old_password):
             flash('Incorrect old password.', 'danger')
             log_event('INCORRECT_OLD_PASSWORD', f'User {current_user.username} entered incorrect old password', severity='WARNING')
             return render_template('change_password.html')
 
+        if new_password != new_password_confirm:
+            flash('New password and confirmation do not match.', 'danger')
+            log_event('PASSWORD_CONFIRMATION_MISMATCH', f'User {current_user.username} new password and confirmation do not match', severity='WARNING')
+            return render_template('change_password.html')
+        
         try:
             # Verify new password strength (example: at least 8 chars)
             if len(new_password) < 8:
