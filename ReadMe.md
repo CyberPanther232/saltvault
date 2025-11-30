@@ -2,7 +2,7 @@
 
 ![SaltVault Logo](./salt_vault_repo_logo.png)
 
-**Version:** Beta - 1.1.1
+**Version:** Beta - 1.1.2
 
 A secure, lightweight, and containerized private password manager built with Flask. This application utilizes the PyNACL library to perform fast effective encryption and decryption of passwords stored within the application. This project is intended to showcase an understanding of secure software development, encryption algorithms, and provide an effective solution for those seeking to utilize a free password manager that does not create a ton of overhead on a user's device. This project is currently in a beta phase and is still under development.
 
@@ -216,4 +216,6 @@ THREADS=2
 
 1.1.0 - Added improved import/export functionality, notifications, settings, and improved functionality on action buttons. - 30-Nov-2025
 
-1.1.1 - Updated UI to make navbar easier to use and updated the dialog boxes on the index.html
+1.1.1 - Updated UI to make navbar easier to use and updated the dialog boxes on the index.html 30-Nov-2025
+
+1.1.2 - Added Tailscale configuration option on the setup_saltvault.py script to allow for Tailscale use and Tailscale Let's Encrypt certificates = 30-Nov-2025
