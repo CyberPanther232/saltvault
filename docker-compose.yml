@@ -16,6 +16,7 @@ services:
       - LOG_LEVEL=INFO
       - WORKERS=3
       - THREADS=2
+      - LOG_DIRECTORY=/app/logs
     volumes:
       - ./appdata:/app/data
       - ./logdata:/app/logs

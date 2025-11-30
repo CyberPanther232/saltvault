@@ -36,3 +36,9 @@ def log_event(event_type: str, message: str, severity: str = 'INFO') -> None:
     logger = get_logger('SaltVaultApp')
     log_func = getattr(logger, severity.lower(), logger.info)
     log_func(f'[{event_type}] {message}')
+
+# Configure werkzeug logger once on import to ensure HTTP logs go to file
+try:
+    get_logger('werkzeug')
+except Exception:
+    pass

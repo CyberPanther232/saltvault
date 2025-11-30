@@ -196,6 +196,12 @@ h2 {
     box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
 }
 
+/* Add Password page spacing tweaks */
+.form-group .btn { margin-right:.5rem; margin-top:.25rem; }
+.input-group { margin-bottom:.5rem; }
+#password-strength-meter { margin-top:.5rem; }
+.form-group + .form-group { margin-top: 1rem; }
+
 .form-control {
     background-color: var(--surface-color);
     color: var(--text-color);
