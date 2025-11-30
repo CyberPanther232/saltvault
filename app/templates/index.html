@@ -227,6 +227,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Modal logic
+    const deleteModal = document.getElementById('deleteModal');
+    if (deleteModal) {
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        let passwordIdToDelete;
+
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            passwordIdToDelete = button.getAttribute('data-id');
+        });
+
+        confirmDeleteBtn.addEventListener('click', function () {
+            const form = document.getElementById(`delete-form-${passwordIdToDelete}`);
+            if (form) {
+                form.submit();
+            }
+        });
+    }
+
+    const bulkDeleteModal = document.getElementById('bulkDeleteModal');
+    if (bulkDeleteModal) {
+        const confirmBulkDeleteBtn = document.getElementById('confirmBulkDeleteBtn');
+        const bulkDeleteForm = document.getElementById('bulk-delete-form');
+
+        confirmBulkDeleteBtn.addEventListener('click', function () {
+            bulkDeleteForm.submit();
+        });
+    }
 });
 </script>
 {% endblock %}
