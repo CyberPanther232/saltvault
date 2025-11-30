@@ -5,8 +5,9 @@ from logging.handlers import RotatingFileHandler
 def get_logger(name: str) -> logging.Logger:
     """Create and configure a logger."""
     
+    log_dir == os.environ.get('LOG_DIRECTORY', 'logs')
+    
     if name == 'werkzeug':
-        log_dir = os.environ.get('LOG_DIRECTORY', 'logs')
         os.makedirs(log_dir, exist_ok=True)
         logfile = os.path.join(log_dir, 'http.log')
         
@@ -25,7 +26,6 @@ def get_logger(name: str) -> logging.Logger:
         
         return werkzeug_logger
     
-    log_dir = os.environ.get('LOG_DIRECTORY', 'logs')
     os.makedirs(log_dir, exist_ok=True)
     
     logger = logging.getLogger(name)

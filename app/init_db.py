@@ -2,6 +2,7 @@ import sqlite3
 import os
 from flask import g, current_app
 import click
+from pathlib import Path
 
 
 def get_db():
@@ -31,13 +32,22 @@ def close_connection(exception=None):
         db.close()
 
 
-def init_db():
-    db = get_db()
-    schema_path = os.path.join(os.path.dirname(__file__), 'data', 'database_schema.sql')
-    with open(schema_path, 'r') as f:
+def _exec_schema(db):
+    """Execute the full schema file (idempotent due to IF NOT EXISTS)."""
+    schema_path = Path(os.path.dirname(__file__)) / 'data' / 'database_schema.sql'
+    with schema_path.open('r') as f:
         db.executescript(f.read())
-
     db.commit()
+
+def init_db():
+    """Initialize a fresh database using the schema file."""
+    db = get_db()
+    _exec_schema(db)
+
+def migrate_db():
+    """Ensure all tables exist (safe to run on existing DB)."""
+    db = get_db()
+    _exec_schema(db)
 
 
 @click.command('init-db')
@@ -45,7 +55,16 @@ def init_db_command():
     init_db()
     click.echo('Initialized the database.')
 
+@click.command('migrate-db')
+def migrate_db_command():
+    migrate_db()
+    click.echo('Database schema verified / migrated.')
+
 
 def init_app(app):
     app.teardown_appcontext(close_connection)
     app.cli.add_command(init_db_command)
+    app.cli.add_command(migrate_db_command)
+    # Attempt automatic migration at startup (within app context)
+    with app.app_context():
+        migrate_db()
