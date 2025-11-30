@@ -1,0 +1,12 @@
+upstream web {
+    server web:5000;
+}
+
+# If {{SSL_MODE}} is 'cloudflare' we only serve HTTP below
+server {
+    listen 80;
+    server_name {{DOMAIN}};
+{{REDIRECT_BLOCK}}
+}
+
+{{SSL_SERVER_BLOCK}}
