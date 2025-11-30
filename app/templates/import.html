@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Import Passwords{% endblock %}
+
+{% block content %}
+    <h2>Import Passwords from CSV</h2>
+    <p>
+        Upload a CSV file with your passwords. The file should have the following columns in this order:
+        <code>name,login_username,login_password,login_uri,notes</code>
+    </p>
+    <form method="POST" action="{{ url_for('main.import_passwords') }}" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="csv_file">CSV File</label>
+            <input type="file" class="form-control-file" id="csv_file" name="csv_file" accept=".csv" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Import</button>
+    </form>
+{% endblock %}

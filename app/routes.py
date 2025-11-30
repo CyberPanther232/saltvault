@@ -562,3 +562,53 @@ def export_passwords():
         mimetype="text/csv",
         headers={"Content-Disposition": "attachment;filename=saltvault_export.csv"}
     )
+
+@main.route('/import', methods=['GET', 'POST'])
+@login_required
+def import_passwords():
+    if request.method == 'GET':
+        log_event('ACCESS_IMPORT_PAGE', f'User {current_user.username} accessed import page', severity='INFO')
+        return render_template('import.html')
+
+    # POST: handle CSV upload (basic placeholder)
+    file = request.files.get('file')
+    if not file or file.filename == '':
+        flash('No file selected.', 'warning')
+        log_event('IMPORT_NO_FILE', f'User {current_user.username} submitted import without file', severity='WARNING')
+        return redirect(url_for('main.import_passwords'))
+
+    try:
+        key = get_key()
+        if not key:
+            return redirect(url_for('main.logout'))
+
+        stream = io.StringIO(file.stream.read().decode('utf-8'))
+        reader = csv.DictReader(stream)
+        db = get_db()
+
+        for row in reader:
+            title = row.get('name', '')
+            login_username = row.get('login_username', '')
+            login_password = row.get('login_password', '')
+            login_uri = row.get('login_uri', '')
+            notes = row.get('notes', '')
+
+            enc_title = encrypt_data(key, title).hex()
+            enc_username = encrypt_data(key, login_username).hex()
+            enc_password = encrypt_data(key, login_password).hex()
+            enc_email = encrypt_data(key, login_uri).hex()
+            enc_notes = encrypt_data(key, notes).hex() if notes else None
+
+            db.execute(
+                'INSERT INTO passwords (user_id, title, username, password, email, notes) VALUES (?, ?, ?, ?, ?, ?)',
+                (current_user.id, enc_title, enc_username, enc_password, enc_email, enc_notes)
+            )
+
+        db.commit()
+        flash('Passwords imported successfully.', 'success')
+        log_event('PASSWORDS_IMPORTED', f'User {current_user.username} imported passwords from CSV', severity='INFO')
+        return redirect(url_for('main.index_route'))
+    except Exception as e:
+        log_event('IMPORT_ERROR', f'Error importing passwords for user {current_user.username}: {e}', severity='ERROR')
+        flash(f'Error importing passwords: {e}', 'danger')
+        return redirect(url_for('main.import_passwords'))

@@ -25,11 +25,30 @@ h2 {
     margin-bottom: 1.5rem;
 }
 
+.login-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.app-title {
+    font-size: 4rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    font-family: 'Georgia', serif;
+}
+
+.login-logo-img {
+    height: 250px; /* Increased logo size for login page */
+    width: auto;
+    margin-bottom: 2rem;
+    filter: drop-shadow(0 0 10px var(--primary-color));
+}
+
 .auth-container {
-    background-image: url('../images/salt_vault_icon.png');
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: contain;
     padding: 3rem; /* Increased padding */
     border: 1px solid var(--border-color);
     border-radius: 0.5rem;
