@@ -7,7 +7,7 @@ services:
       - FLASK_APP=main.py
       - FLASK_ENV=production
       - DEBUG=False
-      - DATABASE_PATH=/app/app/data/dev_database.db
+      - DATABASE_PATH=/app/data/dev_database.db
       - SESSION_COOKIE_SECURE=True
       - SESSION_COOKIE_HTTPONLY=True
       - SESSION_COOKIE_SAMESITE=Strict
@@ -17,7 +17,8 @@ services:
       - WORKERS=3
       - THREADS=2
     volumes:
-      - ./app/data:/app/app/data
+      - ./app/data:/app/data
+      - ./app/logs:/app/logs
       # Persist instance folder to retain generated secret_key across container restarts
       - ./instance:/app/instance
     restart: unless-stopped
