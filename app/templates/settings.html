@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}SaltVault - Settings{% endblock %}
+{% block content %}
+<h2>Account Settings</h2>
+
+<section class="mt-4">
+	<h4>MFA Status</h4>
+	<p>Unused backup codes: {{ unused_backup_codes if unused_backup_codes is not none else 0 }}</p>
+	{% if display_backup_codes %}
+	<div class="alert alert-warning">
+		<strong>Store These Codes Securely Now!</strong> They will not be shown again.
+	</div>
+	<ul>
+		{% for c in display_backup_codes %}
+		<li><code>{{ c }}</code></li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+	<form method="post" action="{{ url_for('main.regenerate_backup_codes') }}" class="mt-2">
+		<button type="submit" class="btn btn-sm btn-secondary">Generate New Backup Codes</button>
+	</form>
+</section>
+
+<section class="mt-4">
+	<h4>Regenerate MFA Secret</h4>
+	<p>Requires current password AND either a valid current TOTP or an unused backup code.</p>
+	<form method="post" action="{{ url_for('main.regenerate_mfa') }}">
+		<div class="form-group">
+			<label for="password">Current Password</label>
+			<input type="password" class="form-control" id="password" name="password" required>
+		</div>
+		<div class="form-group">
+			<label for="totp">Current TOTP (preferred)</label>
+			<input type="text" class="form-control" id="totp" name="totp" placeholder="Enter TOTP OR backup code">
+		</div>
+		<div class="form-group">
+			<label for="backup_code">Unused Backup Code (alternative)</label>
+			<input type="text" class="form-control" id="backup_code" name="backup_code" placeholder="Backup code if TOTP unavailable">
+		</div>
+		<button type="submit" class="btn btn-danger">Regenerate MFA Secret</button>
+	</form>
+</section>
+
+<section class="mt-4">
+	<h4>Notification Integrations</h4>
+	<p>Configure environment variables for Discord or Email notifications:</p>
+	<ul>
+		<li><code>DISCORD_WEBHOOK_URL</code> – Discord channel webhook for security events.</li>
+		<li><code>EMAIL_ENABLED=True</code>, <code>SMTP_SERVER</code>, <code>SMTP_PORT</code>, <code>SMTP_USER</code>, <code>SMTP_PASSWORD</code>, <code>EMAIL_FROM</code>, <code>EMAIL_TO</code></li>
+	</ul>
+	<p>Edit <code>app/app.env</code> or your deployment environment and restart the application to apply changes.</p>
+	<hr>
+	<h5>Discord Webhook Configuration</h5>
+	{% if discord_configured %}
+		<p class="text-success">Discord webhook is configured.</p>
+		<form method="post" action="{{ url_for('main.test_discord') }}" class="mb-3">
+			<button type="submit" class="btn btn-sm btn-primary">Send Test Discord Notification</button>
+		</form>
+	{% else %}
+		<p class="text-warning">No Discord webhook configured.</p>
+	{% endif %}
+	<form method="post" action="{{ url_for('main.update_discord') }}">
+		<div class="form-group">
+			<label for="discord_webhook">Discord Webhook URL</label>
+			<input type="text" class="form-control" id="discord_webhook" name="discord_webhook" placeholder="https://discord.com/api/webhooks/..." required>
+		</div>
+		<div class="form-group mt-2">
+			<label for="password">Confirm Password</label>
+			<input type="password" class="form-control" id="password" name="password" required>
+		</div>
+		<button type="submit" class="btn btn-sm btn-secondary mt-2">Save & Test Webhook</button>
+	</form>
+	<hr>
+	<h5>Notification Preferences</h5>
+	<form method="post" action="{{ url_for('main.update_notification_prefs') }}" class="mt-2">
+		<table class="table table-sm table-dark">
+			<thead>
+				<tr>
+					<th>Category</th>
+					<th>Discord</th>
+					<th>Email</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Login Events</td>
+					<td><input type="checkbox" name="discord_login" {% if notification_prefs and notification_prefs['discord_login'] %}checked{% endif %}></td>
+					<td><input type="checkbox" name="email_login" {% if notification_prefs and notification_prefs['email_login'] %}checked{% endif %}></td>
+				</tr>
+				<tr>
+					<td>Import/Export</td>
+					<td><input type="checkbox" name="discord_import_export" {% if notification_prefs and notification_prefs['discord_import_export'] %}checked{% endif %}></td>
+					<td><input type="checkbox" name="email_import_export" {% if notification_prefs and notification_prefs['email_import_export'] %}checked{% endif %}></td>
+				</tr>
+				<tr>
+					<td>Password Deletion</td>
+					<td><input type="checkbox" name="discord_deletion" {% if notification_prefs and notification_prefs['discord_deletion'] %}checked{% endif %}></td>
+					<td><input type="checkbox" name="email_deletion" {% if notification_prefs and notification_prefs['email_deletion'] %}checked{% endif %}></td>
+				</tr>
+				<tr>
+					<td>Security Events</td>
+					<td><input type="checkbox" name="discord_security" {% if notification_prefs and notification_prefs['discord_security'] %}checked{% endif %}></td>
+					<td><input type="checkbox" name="email_security" {% if notification_prefs and notification_prefs['email_security'] %}checked{% endif %}></td>
+				</tr>
+			</tbody>
+		</table>
+		<button type="submit" class="btn btn-sm btn-primary">Save Notification Preferences</button>
+	</form>
+</section>
+{% endblock %}

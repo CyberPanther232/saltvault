@@ -12,8 +12,8 @@
 
         <div class="toolbar mb-3">
             <a href="{{ url_for('main.add_password') }}" class="btn btn-primary me-2">Add Password</a>
-            <a href="{{ url_for('main.export_passwords') }}" class="btn btn-secondary me-2">Export CSV</a>
-            <a href="{{ url_for('main.import_passwords') }}" class="btn btn-info me-2">Import CSV</a>
+            <a href="{{ url_for('main.export_passwords') }}" class="btn btn-secondary me-2">Export</a>
+            <a href="{{ url_for('main.import_passwords') }}" class="btn btn-info me-2">Import</a>
         </div>
 
         <form class="search-form mb-3" method="GET" action="{{ url_for('main.index_route') }}">

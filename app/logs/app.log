@@ -1,0 +1,254 @@
+2025-11-29 17:21:45,061 - main - INFO - Starting SaltVault application
+2025-11-29 17:21:45,061 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 17:21:45,406 - main - INFO - Starting SaltVault application
+2025-11-29 17:21:45,407 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 17:27:27,172 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-29 17:27:34,796 - SaltVaultApp - WARNING - [INVALID_MFA] Invalid TOTP entered for username admin
+2025-11-29 17:27:39,400 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-29 17:27:39,715 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 17:27:39,715 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 17:29:28,632 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 17:29:28,632 - SaltVaultApp - INFO - [USER_LOGOUT] User admin logged out
+2025-11-29 17:31:13,894 - main - INFO - Starting SaltVault application
+2025-11-29 17:31:13,894 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 17:43:51,648 - main - INFO - Starting SaltVault application
+2025-11-29 17:43:51,648 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 17:43:52,005 - main - INFO - Starting SaltVault application
+2025-11-29 17:43:52,005 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 17:44:18,248 - main - INFO - Starting SaltVault application
+2025-11-29 17:44:18,248 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 17:44:18,591 - main - INFO - Starting SaltVault application
+2025-11-29 17:44:18,591 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 17:44:45,231 - main - INFO - Starting SaltVault application
+2025-11-29 17:44:45,231 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 17:44:45,606 - main - INFO - Starting SaltVault application
+2025-11-29 17:44:45,608 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 17:45:28,462 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-29 17:45:41,695 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-29 17:45:41,917 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 17:45:41,918 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 17:46:58,523 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 17:46:58,523 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 17:47:00,821 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 17:47:00,821 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 17:48:16,028 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 17:48:16,028 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 17:51:55,021 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 17:51:55,021 - SaltVaultApp - INFO - [ACCESS_EXPORT_PAGE] User admin accessed export page
+2025-11-29 17:52:07,684 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 17:52:07,684 - SaltVaultApp - INFO - [ACCESS_EXPORT_PAGE] User admin accessed export page
+2025-11-29 17:52:09,071 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 17:52:09,071 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 17:54:40,926 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 17:54:40,927 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 17:54:40,927 - SaltVaultApp - INFO - [PASSWORD_VIEWED] User admin viewed password ID 1
+2025-11-29 17:54:45,571 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 17:54:45,571 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 17:54:45,571 - SaltVaultApp - INFO - [PASSWORD_VIEWED] User admin viewed password ID 1
+2025-11-29 21:17:29,512 - main - INFO - Starting SaltVault application
+2025-11-29 21:17:29,512 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 21:17:29,858 - main - INFO - Starting SaltVault application
+2025-11-29 21:17:29,858 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 21:18:04,882 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-29 21:18:27,608 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-29 21:18:27,920 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:18:27,920 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:20:48,525 - main - INFO - Starting SaltVault application
+2025-11-29 21:20:48,525 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 21:20:48,881 - main - INFO - Starting SaltVault application
+2025-11-29 21:20:48,882 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 21:23:04,755 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-29 21:23:16,170 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-29 21:23:16,488 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:23:16,488 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:24:08,971 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:24:08,972 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:24:45,102 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:24:45,102 - SaltVaultApp - INFO - [USER_ALREADY_LOGGED_IN] User admin is already logged in, redirecting to index page
+2025-11-29 21:24:45,414 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:24:45,414 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:25:15,902 - main - INFO - Starting SaltVault application
+2025-11-29 21:25:15,902 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 21:25:16,274 - main - INFO - Starting SaltVault application
+2025-11-29 21:25:16,275 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 21:30:54,133 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-29 21:31:07,808 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-29 21:31:08,123 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:31:08,125 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:32:04,475 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:32:04,475 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:32:11,493 - main - INFO - Starting SaltVault application
+2025-11-29 21:32:11,493 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 21:32:11,934 - main - INFO - Starting SaltVault application
+2025-11-29 21:32:11,934 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 21:32:16,610 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-29 21:32:20,907 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-29 21:32:21,248 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:32:21,249 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:35:04,426 - main - INFO - Starting SaltVault application
+2025-11-29 21:35:04,426 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 21:35:04,797 - main - INFO - Starting SaltVault application
+2025-11-29 21:35:04,798 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 21:35:11,487 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-29 21:35:22,193 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-29 21:35:22,513 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:35:22,514 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:38:38,669 - main - INFO - Starting SaltVault application
+2025-11-29 21:38:38,670 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 21:38:39,017 - main - INFO - Starting SaltVault application
+2025-11-29 21:38:39,017 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 21:38:45,218 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-29 21:38:51,641 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-29 21:38:51,957 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:38:51,958 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:39:22,349 - main - INFO - Starting SaltVault application
+2025-11-29 21:39:22,349 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-29 21:39:42,151 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-29 21:39:47,400 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-29 21:39:47,710 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:39:47,712 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:40:27,477 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:40:27,477 - SaltVaultApp - INFO - [ACCESS_EXPORT_PAGE] User admin accessed export page
+2025-11-29 21:40:36,508 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:40:36,508 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:41:14,375 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:41:14,375 - SaltVaultApp - INFO - [ACCESS_EXPORT_PAGE] User admin accessed export page
+2025-11-29 21:41:18,767 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:41:18,768 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:41:36,704 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:41:36,704 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:41:36,705 - SaltVaultApp - INFO - [PASSWORD_VIEWED] User admin viewed password ID 1
+2025-11-29 21:41:49,636 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:41:49,637 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-29 21:41:49,637 - SaltVaultApp - INFO - [PASSWORD_VIEWED] User admin viewed password ID 1
+2025-11-29 21:41:57,669 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:41:57,669 - SaltVaultApp - INFO - [ACCESS_IMPORT_PAGE] User admin accessed import page
+2025-11-29 21:42:21,555 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-29 21:42:21,555 - SaltVaultApp - INFO - [USER_LOGOUT] User admin logged out
+2025-11-30 08:50:52,901 - main - INFO - Starting SaltVault application
+2025-11-30 08:50:52,903 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 08:50:53,486 - main - INFO - Starting SaltVault application
+2025-11-30 08:50:53,486 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 08:51:02,097 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-30 08:51:17,478 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-30 08:51:17,792 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:51:17,793 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 08:51:23,246 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:51:23,246 - SaltVaultApp - INFO - [ACCESS_IMPORT_PAGE] User admin accessed import page
+2025-11-30 08:51:27,745 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:51:27,747 - SaltVaultApp - WARNING - [IMPORT_NO_FILE] User admin submitted import without file
+2025-11-30 08:51:28,066 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:51:28,066 - SaltVaultApp - INFO - [ACCESS_IMPORT_PAGE] User admin accessed import page
+2025-11-30 08:51:41,947 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:51:41,949 - SaltVaultApp - WARNING - [IMPORT_NO_FILE] User admin submitted import without file
+2025-11-30 08:51:42,272 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:51:42,274 - SaltVaultApp - INFO - [ACCESS_IMPORT_PAGE] User admin accessed import page
+2025-11-30 08:53:40,432 - main - INFO - Starting SaltVault application
+2025-11-30 08:53:40,432 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 08:53:44,953 - main - INFO - Starting SaltVault application
+2025-11-30 08:53:44,954 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 08:53:46,437 - main - INFO - Starting SaltVault application
+2025-11-30 08:53:46,437 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 08:53:50,973 - main - INFO - Starting SaltVault application
+2025-11-30 08:53:50,973 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 08:54:11,088 - SaltVaultApp - WARNING - [INVALID_LOGIN] Invalid login attempt for username admin
+2025-11-30 08:54:14,845 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-30 08:54:23,977 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-30 08:54:24,289 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:54:24,289 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 08:54:26,475 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:54:26,476 - SaltVaultApp - INFO - [ACCESS_IMPORT_PAGE] User admin accessed import page
+2025-11-30 08:54:30,050 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:54:30,052 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 08:54:30,063 - SaltVaultApp - INFO - [PASSWORDS_IMPORTED] User admin imported passwords from CSV
+2025-11-30 08:54:30,372 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:54:30,372 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 08:55:38,272 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:55:38,275 - SaltVaultApp - INFO - [PASSWORD_DELETED] User admin deleted password ID 1
+2025-11-30 08:55:38,533 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:55:38,533 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 08:55:44,715 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:55:44,718 - SaltVaultApp - INFO - [PASSWORD_DELETED] User admin deleted password ID 2
+2025-11-30 08:55:45,030 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:55:45,030 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 08:55:51,887 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:55:51,890 - SaltVaultApp - INFO - [PASSWORD_DELETED] User admin deleted password ID 3
+2025-11-30 08:55:52,234 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 08:55:52,236 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 08:58:56,349 - main - INFO - Starting SaltVault application
+2025-11-30 08:58:56,349 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 08:59:41,605 - main - INFO - Starting SaltVault application
+2025-11-30 08:59:41,606 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 08:59:44,475 - main - INFO - Starting SaltVault application
+2025-11-30 08:59:44,476 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 08:59:44,832 - main - INFO - Starting SaltVault application
+2025-11-30 08:59:44,832 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 08:59:51,215 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-30 09:00:01,127 - SaltVaultApp - WARNING - [INVALID_MFA] Invalid TOTP entered for username admin
+2025-11-30 09:00:04,724 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-30 09:00:05,040 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:00:05,040 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 09:00:17,102 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:00:17,108 - SaltVaultApp - INFO - [BULK_DELETE_SUCCESS] User admin deleted 263 passwords
+2025-11-30 09:00:17,426 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:00:17,426 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 09:00:31,303 - main - INFO - Starting SaltVault application
+2025-11-30 09:00:31,303 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 09:03:23,234 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-30 09:03:26,905 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-30 09:03:27,216 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:03:27,217 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 09:03:32,126 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:03:36,973 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:03:37,082 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 09:03:37,252 - SaltVaultApp - INFO - [PASSWORD_CHANGED] User admin changed their password and re-encrypted all data
+2025-11-30 09:03:37,567 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:03:37,567 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 09:04:03,347 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:04:21,754 - main - INFO - Starting SaltVault application
+2025-11-30 09:04:21,755 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 09:04:45,629 - main - INFO - Starting SaltVault application
+2025-11-30 09:04:45,631 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 09:04:49,503 - main - INFO - Starting SaltVault application
+2025-11-30 09:04:49,504 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 09:04:49,858 - main - INFO - Starting SaltVault application
+2025-11-30 09:04:49,858 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 09:04:55,755 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-30 09:05:00,520 - SaltVaultApp - WARNING - [INVALID_MFA] Invalid TOTP entered for username admin
+2025-11-30 09:05:04,620 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-30 09:05:04,936 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:05:04,938 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 09:05:08,161 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:05:14,544 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:05:14,657 - SaltVaultApp - WARNING - [PASSWORD_CONFIRMATION_MISMATCH] User admin new password and confirmation do not match
+2025-11-30 09:05:27,033 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:05:27,143 - SaltVaultApp - WARNING - [INCORRECT_OLD_PASSWORD] User admin entered incorrect old password
+2025-11-30 09:05:32,669 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:05:32,786 - SaltVaultApp - WARNING - [WEAK_NEW_PASSWORD] User admin entered a weak new password
+2025-11-30 09:05:44,445 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:05:44,558 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 09:05:44,725 - SaltVaultApp - INFO - [PASSWORD_CHANGED] User admin changed their password and re-encrypted all data
+2025-11-30 09:05:45,042 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:05:45,042 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 09:46:11,213 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:46:11,213 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 09:52:20,355 - main - INFO - Starting SaltVault application
+2025-11-30 09:52:20,355 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 09:52:24,888 - main - INFO - Starting SaltVault application
+2025-11-30 09:52:24,890 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 09:56:01,155 - main - INFO - Starting SaltVault application
+2025-11-30 09:56:01,155 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 09:56:01,528 - main - INFO - Starting SaltVault application
+2025-11-30 09:56:01,530 - SaltVaultApp - INFO - [APPLICATION_START] SaltVault application has started
+2025-11-30 09:56:08,528 - SaltVaultApp - WARNING - [INVALID_LOGIN] Invalid login attempt for username admin
+2025-11-30 09:56:13,311 - SaltVaultApp - WARNING - [INVALID_LOGIN] Invalid login attempt for username admin
+2025-11-30 09:56:18,348 - SaltVaultApp - INFO - [VALID_CREDENTIALS_ENTERED] User admin credentials entered successfully
+2025-11-30 09:56:29,911 - SaltVaultApp - INFO - [USER_LOGIN_SUCCESSFUL] User admin logged in successfully with MFA
+2025-11-30 09:56:30,225 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:56:30,226 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 09:57:28,755 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 09:57:28,755 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 10:08:30,567 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 10:08:30,567 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1
+2025-11-30 10:08:32,728 - SaltVaultApp - INFO - [USER_LOADED_FROM_SESSION] User ID 1 loaded from session
+2025-11-30 10:08:32,730 - SaltVaultApp - INFO - [KEY_RETRIEVED_FROM_SESSION] Encryption key retrieved from session for user ID 1

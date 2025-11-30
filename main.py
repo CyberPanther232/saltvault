@@ -5,7 +5,9 @@ import os
 app = create_app()
 
 if __name__ == '__main__':
-    logger = get_logger('main')
-    logger.info('Starting SaltVault application')
+    event_logger = get_logger('main')
+    event_logger.info('Starting SaltVault application')
+    http_logger = get_logger('werkzeug')
+    http_logger.info('Starting HTTP server for SaltVault application')
     log_event('APPLICATION_START', 'SaltVault application has started')
     app.run(debug=os.environ.get('DEBUG', True), host=os.environ.get('HOST', 'localhost'), port=int(os.environ.get('PORT', 80)))

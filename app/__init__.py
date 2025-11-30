@@ -18,6 +18,7 @@ def create_app():
         else:
             secret_key = os.urandom(32).hex()
             key_file.write_text(secret_key)
+        
     app.config['SECRET_KEY'] = secret_key
     # Store DB under app/data by default; allow env override
     default_db = os.path.join('app', 'data', 'dev_database.db')
@@ -65,7 +66,6 @@ def create_app():
             if request.endpoint and 'init-db' not in request.endpoint:
                  # In a web context, if the DB is not ready, go to setup.
                 return redirect(url_for('main.setup'))
-
 
     login_manager.init_app(app)
     login_manager.login_view = 'main.login'

@@ -8,6 +8,17 @@
     <div class="text-center">
         <img src="data:image/png;base64,{{ qr_code }}" alt="MFA QR Code">
     </div>
+    {% if backup_codes %}
+    <div class="mt-4">
+        <h4>Your Backup Codes (Store Securely)</h4>
+        <p>These codes can be used if you lose access to your authenticator. Each code is one-time use. They will not be shown again.</p>
+        <ul>
+            {% for code in backup_codes %}
+            <li><code>{{ code }}</code></li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
     <form method="POST" action="{{ url_for('main.verify_mfa') }}" class="mt-4">
         <div class="form-group">
             <label for="totp">TOTP Code</label>

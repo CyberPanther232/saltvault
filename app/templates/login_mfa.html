@@ -11,4 +11,7 @@
         </div>
         <button type="submit" class="btn btn-primary">Verify</button>
     </form>
+    <hr>
+    <p>If you lost your authenticator device, you can use a one-time backup code.</p>
+    <a class="btn btn-secondary" href="{{ url_for('main.login_mfa_backup') }}">Use Backup Code</a>
 {% endblock %}
