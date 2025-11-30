@@ -158,35 +158,7 @@ def generate_self_signed(domain: str):
 
 
 def copy_existing():
-    def have_tailscale() -> bool:
-        return subprocess.run(['tailscale','version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
-
-    def generate_tailscale_cert(domain: str):
-        """Generate or copy Tailscale certificate using `tailscale cert`.
-        Certificates produced are domain.crt / domain.key in current working directory (or existing cached).
-        We copy them into nginx/certs as fullchain.pem / privkey.pem for uniform nginx config usage.
-        Requires: host already authenticated and joined to tailnet; domain must resolve via MagicDNS.
-        """
-        if not have_tailscale():
-            print("Tailscale CLI not found. Install Tailscale or choose another SSL mode.")
-            sys.exit(1)
-        CERT_DIR.mkdir(parents=True, exist_ok=True)
-        print(f"Requesting Tailscale certificate for {domain}...")
-        # tailscale cert writes <domain>.crt and <domain>.key; will reuse existing if valid (<7 days before expiry triggers renewal)
-        try:
-            subprocess.run(['tailscale','cert', domain], check=True)
-        except subprocess.CalledProcessError as e:
-            print(f"Failed to obtain Tailscale cert: {e}")
-            sys.exit(1)
-        src_crt = Path(f"{domain}.crt")
-        src_key = Path(f"{domain}.key")
-        if not src_crt.is_file() or not src_key.is_file():
-            print("Tailscale did not produce expected cert/key files.")
-            sys.exit(1)
-        DEFAULT_CERT.write_bytes(src_crt.read_bytes())
-        DEFAULT_KEY.write_bytes(src_key.read_bytes())
-        print(f"Copied Tailscale cert/key into {CERT_DIR}")
-
+    """Copy user-provided existing certificate and key into nginx/certs."""
     CERT_DIR.mkdir(parents=True, exist_ok=True)
     fullchain = Path(input("Path to existing fullchain/cert: ").strip())
     privkey = Path(input("Path to existing private key: ").strip())
@@ -196,6 +168,33 @@ def copy_existing():
     DEFAULT_CERT.write_bytes(fullchain.read_bytes())
     DEFAULT_KEY.write_bytes(privkey.read_bytes())
     print("Copied existing certificate and key into nginx/certs.")
+
+def have_tailscale() -> bool:
+    return subprocess.run(['tailscale','version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+
+def generate_tailscale_cert(domain: str):
+    """Generate or copy Tailscale certificate using `tailscale cert`.
+    Produces <domain>.crt / <domain>.key (or reuses cached if still valid). Copies into nginx/certs.
+    Requires host already authenticated with Tailscale; domain should be MagicDNS name (e.g. host.tailnet.ts.net).
+    """
+    if not have_tailscale():
+        print("Tailscale CLI not found. Install Tailscale or choose another SSL mode.")
+        sys.exit(1)
+    CERT_DIR.mkdir(parents=True, exist_ok=True)
+    print(f"Requesting Tailscale certificate for {domain}...")
+    try:
+        subprocess.run(['tailscale','cert', domain], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Failed to obtain Tailscale cert: {e}")
+        sys.exit(1)
+    src_crt = Path(f"{domain}.crt")
+    src_key = Path(f"{domain}.key")
+    if not src_crt.is_file() or not src_key.is_file():
+        print("Tailscale did not produce expected cert/key files.")
+        sys.exit(1)
+    DEFAULT_CERT.write_bytes(src_crt.read_bytes())
+    DEFAULT_KEY.write_bytes(src_key.read_bytes())
+    print(f"Copied Tailscale cert/key into {CERT_DIR}")
 
 
 def render_nginx(domain: str, ssl_mode: str):
