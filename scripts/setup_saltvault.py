@@ -238,6 +238,40 @@ def main():
     domain = prompt_domain()
     ssl_mode = prompt_ssl_mode()
 
+    # Optional environment variable configuration
+    header("Environment Configuration (Optional)")
+    if input("Configure environment variables now? [y/N]: ").strip().lower() == 'y':
+        env_path = Path('app/app.env')
+        print(f"Writing environment variables to {env_path} ...")
+        # Collect values with sensible defaults
+        flask_env = input("FLASK_ENV [production]: ").strip() or 'production'
+        debug = input("DEBUG (True/False) [False]: ").strip() or 'False'
+        db_path = input("DATABASE_PATH [/app/app/data/dev_database.db]: ").strip() or '/app/app/data/dev_database.db'
+        sess_secure = input("SESSION_COOKIE_SECURE (True/False) [True]: ").strip() or 'True'
+        sess_httponly = input("SESSION_COOKIE_HTTPONLY (True/False) [True]: ").strip() or 'True'
+        sess_samesite = input("SESSION_COOKIE_SAMESITE (Strict/Lax/None) [Strict]: ").strip() or 'Strict'
+        sess_lifetime = input("PERMANENT_SESSION_LIFETIME seconds [3600]: ").strip() or '3600'
+        totp_issuer = input("TOTP_ISSUER [SaltVault]: ").strip() or 'SaltVault'
+        log_level = input("LOG_LEVEL (DEBUG/INFO/WARNING/ERROR) [INFO]: ").strip() or 'INFO'
+        workers = input("Gunicorn WORKERS [3]: ").strip() or '3'
+        threads = input("Gunicorn THREADS [2]: ").strip() or '2'
+        with env_path.open('w') as f:
+            f.write('[Application Environment Variables]\n')
+            f.write(f'FLASK_ENV={flask_env}\n')
+            f.write(f'DEBUG={debug}\n')
+            f.write(f'DATABASE_PATH={db_path}\n')
+            f.write(f'SESSION_COOKIE_SECURE={sess_secure}\n')
+            f.write(f'SESSION_COOKIE_HTTPONLY={sess_httponly}\n')
+            f.write(f'SESSION_COOKIE_SAMESITE={sess_samesite}\n')
+            f.write(f'PERMANENT_SESSION_LIFETIME={sess_lifetime}\n')
+            f.write(f'TOTP_ISSUER={totp_issuer}\n')
+            f.write(f'LOG_LEVEL={log_level}\n')
+            f.write(f'WORKERS={workers}\n')
+            f.write(f'THREADS={threads}\n')
+            f.write(f'APP_DOMAIN={domain}\n')
+            f.write(f'SSL_MODE={ssl_mode}\n')
+        print("Environment file written.")
+
     if ssl_mode == 'self-signed':
         header("Generate Self-Signed Certificate")
         generate_self_signed(domain)
@@ -256,6 +290,18 @@ def main():
 
     header("Post Setup")
     post_setup(domain, ssl_mode)
+
+    # Optional DB initialization
+    compose = detect_compose_command()
+    if input("Initialize database now (flask init-db)? [y/N]: ").strip().lower() == 'y':
+        try:
+            print("Initializing database inside 'web' container...")
+            subprocess.run([*compose, 'exec', 'web', 'flask', 'init-db'], check=True)
+            print("Database initialized.")
+        except Exception as e:
+            print(f"Database initialization failed: {e}")
+    else:
+        print("Skipped database initialization. You can run it later with: docker compose exec web flask init-db")
 
 if __name__ == '__main__':
     try:
