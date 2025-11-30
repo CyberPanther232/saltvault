@@ -212,10 +212,10 @@ THREADS=2
 
 # Version Control
 
-1.0.0 - Beta version with the basic functions listed above - 29-Nov-2025
+Beta - 1.0.0 - Beta version with the basic functions listed above - 29-Nov-2025
 
-1.1.0 - Added improved import/export functionality, notifications, settings, and improved functionality on action buttons. - 30-Nov-2025
+Beta - 1.1.0 - Added improved import/export functionality, notifications, settings, and improved functionality on action buttons. - 30-Nov-2025
 
-1.1.1 - Updated UI to make navbar easier to use and updated the dialog boxes on the index.html 30-Nov-2025
+Beta - 1.1.1 - Updated UI to make navbar easier to use and updated the dialog boxes on the index.html 30-Nov-2025
 
-1.1.2 - Added Tailscale configuration option on the setup_saltvault.py script to allow for Tailscale use and Tailscale Let's Encrypt certificates = 30-Nov-2025
+Beta - 1.1.2 - Added Tailscale configuration option on the setup_saltvault.py script to allow for Tailscale use and Tailscale Let's Encrypt certificates = 30-Nov-2025
