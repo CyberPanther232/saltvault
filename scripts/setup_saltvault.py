@@ -73,9 +73,36 @@ def ensure_docker():
     except Exception:
         print("Docker is required. Please install Docker and re-run this script.")
         sys.exit(1)
+    # Detect compose availability
+    if not detect_compose_command():
+        print("Neither 'docker compose' nor 'docker-compose' found. Install Docker Compose plugin or legacy docker-compose.")
+        sys.exit(1)
 
 def have_openssl() -> bool:
     return subprocess.run(['openssl','version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+
+_COMPOSE_CMD = None
+
+def detect_compose_command():
+    """Detect whether 'docker compose' (plugin) or 'docker-compose' (legacy) is available.
+    Returns the chosen command list or None if neither exists."""
+    global _COMPOSE_CMD
+    if _COMPOSE_CMD is not None:
+        return _COMPOSE_CMD
+    # Prefer plugin syntax
+    try:
+        subprocess.run(['docker','compose','version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        _COMPOSE_CMD = ['docker','compose']
+        return _COMPOSE_CMD
+    except Exception:
+        pass
+    # Fallback to legacy binary
+    try:
+        subprocess.run(['docker-compose','version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+        _COMPOSE_CMD = ['docker-compose']
+        return _COMPOSE_CMD
+    except Exception:
+        return None
 
 
 def prompt_domain() -> str:
@@ -174,9 +201,13 @@ def render_nginx(domain: str, ssl_mode: str):
 
 def docker_compose_up():
     print("Building containers...")
-    subprocess.run(['docker', 'compose', 'build'], check=True)
+    compose = detect_compose_command()
+    if compose is None:
+        print("Docker Compose not available. Aborting.")
+        sys.exit(1)
+    subprocess.run([*compose, 'build'], check=True)
     print("Starting stack...")
-    subprocess.run(['docker', 'compose', 'up', '-d'], check=True)
+    subprocess.run([*compose, 'up', '-d'], check=True)
     print("Stack is up.")
 
 
