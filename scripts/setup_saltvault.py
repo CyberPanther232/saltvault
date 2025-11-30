@@ -246,7 +246,7 @@ def main():
         # Collect values with sensible defaults
         flask_env = input("FLASK_ENV [production]: ").strip() or 'production'
         debug = input("DEBUG (True/False) [False]: ").strip() or 'False'
-        db_path = input("DATABASE_PATH [/app/app/data/dev_database.db]: ").strip() or '/app/app/data/dev_database.db'
+        db_path = input("DATABASE_PATH [/app/data/dev_database.db]: ").strip() or '/app/data/dev_database.db'
         sess_secure = input("SESSION_COOKIE_SECURE (True/False) [True]: ").strip() or 'True'
         sess_httponly = input("SESSION_COOKIE_HTTPONLY (True/False) [True]: ").strip() or 'True'
         sess_samesite = input("SESSION_COOKIE_SAMESITE (Strict/Lax/None) [Strict]: ").strip() or 'Strict'
@@ -255,6 +255,7 @@ def main():
         log_level = input("LOG_LEVEL (DEBUG/INFO/WARNING/ERROR) [INFO]: ").strip() or 'INFO'
         workers = input("Gunicorn WORKERS [3]: ").strip() or '3'
         threads = input("Gunicorn THREADS [2]: ").strip() or '2'
+        log_directory = input("LOG_DIRECTORY [/app/logs]: ").strip() or '/app/logs'
         with env_path.open('w') as f:
             f.write('[Application Environment Variables]\n')
             f.write(f'FLASK_ENV={flask_env}\n')
@@ -270,6 +271,7 @@ def main():
             f.write(f'THREADS={threads}\n')
             f.write(f'APP_DOMAIN={domain}\n')
             f.write(f'SSL_MODE={ssl_mode}\n')
+            f.write(f'LOG_DIRECTORY={log_directory}\n')
         print("Environment file written.")
 
     if ssl_mode == 'self-signed':
