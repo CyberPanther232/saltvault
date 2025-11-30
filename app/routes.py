@@ -616,6 +616,43 @@ def export_passwords():
         headers={"Content-Disposition": "attachment;filename=saltvault_export.csv"}
     )
 
+# Password utilities API
+@main.route('/generate-password', methods=['POST'])
+def api_generate_password():
+    try:
+        data = request.get_json(force=True) or {}
+        length = int(data.get('length', 16))
+        uppercase = bool(data.get('uppercase', True))
+        numbers = bool(data.get('numbers', True))
+        symbols = bool(data.get('symbols', True))
+        pwd = generate_password(length=length, use_uppercase=uppercase, use_numbers=numbers, use_symbols=symbols)
+        return jsonify({'password': pwd})
+    except Exception as e:
+        log_event('GENERATE_PASSWORD_ERROR', f'Error generating password: {e}', severity='ERROR')
+        return jsonify({'error': 'Failed to generate password'}), 400
+
+@main.route('/strengthen-password', methods=['POST'])
+def api_strengthen_password():
+    try:
+        data = request.get_json(force=True) or {}
+        pwd = data.get('password', '')
+        stronger = strengthen_password(pwd)
+        return jsonify({'password': stronger})
+    except Exception as e:
+        log_event('STRENGTHEN_PASSWORD_ERROR', f'Error strengthening password: {e}', severity='ERROR')
+        return jsonify({'error': 'Failed to strengthen password'}), 400
+
+@main.route('/check-password-strength', methods=['POST'])
+def api_check_password_strength():
+    try:
+        data = request.get_json(force=True) or {}
+        pwd = data.get('password', '')
+        score = check_password_strength(pwd)
+        return jsonify({'strength': score})
+    except Exception as e:
+        log_event('CHECK_PASSWORD_STRENGTH_ERROR', f'Error checking password strength: {e}', severity='ERROR')
+        return jsonify({'error': 'Failed to check strength'}), 400
+
 @main.route('/import', methods=['GET', 'POST'])
 @login_required
 def import_passwords():
