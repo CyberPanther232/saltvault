@@ -16,6 +16,7 @@ import subprocess
 import importlib
 from pathlib import Path
 from textwrap import dedent
+from datetime import datetime, timedelta
 
 TEMPLATE_PATH = Path('nginx/nginx.conf.template')
 OUTPUT_CONF = Path('nginx/nginx.conf')
@@ -108,15 +109,18 @@ def generate_self_signed(domain: str):
             sys.exit(1)
     key = rsa.generate_private_key(public_exponent=65537, key_size=4096)
     subject = issuer = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, domain)])
-    cert = (x509.CertificateBuilder()
-            .subject_name(subject)
-            .issuer_name(issuer)
-            .public_key(key.public_key())
-            .serial_number(x509.random_serial_number())
-            .not_valid_before(x509.datetime.datetime.utcnow())
-            .not_valid_after(x509.datetime.datetime.utcnow() + x509.datetime.timedelta(days=SELF_SIGNED_VALID_DAYS))
-            .add_extension(x509.SubjectAlternativeName([x509.DNSName(domain)]), critical=False)
-            .sign(key, hashes.SHA256()))
+    # Use standard datetime utilities (cryptography does not expose x509.datetime)
+    cert = (
+        x509.CertificateBuilder()
+        .subject_name(subject)
+        .issuer_name(issuer)
+        .public_key(key.public_key())
+        .serial_number(x509.random_serial_number())
+        .not_valid_before(datetime.utcnow())
+        .not_valid_after(datetime.utcnow() + timedelta(days=SELF_SIGNED_VALID_DAYS))
+        .add_extension(x509.SubjectAlternativeName([x509.DNSName(domain)]), critical=False)
+        .sign(key, hashes.SHA256())
+    )
     DEFAULT_KEY.write_bytes(key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.TraditionalOpenSSL,
