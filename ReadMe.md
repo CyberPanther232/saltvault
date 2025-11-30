@@ -34,7 +34,7 @@ A secure, lightweight, and containerized private password manager built with Fla
 
 1.  **Clone the repository:**
     ```bash
-    git clone <repository_url>
+    git clone https://www.github.com/CyberPanther232/saltvault
     cd saltvault
     ```
 
@@ -42,11 +42,13 @@ A secure, lightweight, and containerized private password manager built with Fla
     -   Rename `app.env.example` to `app.env`.
     -   For production, it is recommended to change the `DATABASE_PATH` to a location outside of the `app` directory.
 
-3.  **SSL Certificates (for production with Docker):**
+3.  **SSL Certificates (for production with Docker) - CloudFlare Recommended:**
+    -   If you are using CloudFlare, ensure you generate a new certificate to host on the server/workstation you run this application on.
+    -   SSL/TLS is highly recommended for using this application. Even if hosted locally on your own machine. 
     -   Place your SSL certificate (`fullchain.pem`) and private key (`privkey.pem`) in the `nginx/certs/` directory.
     -   Update `nginx/nginx.conf` with your domain name.
 
-4.  **Run the application:**
+5.  **Run the application:**
     -   **With Docker (recommended for production):**
         ```bash
         docker-compose up -d
