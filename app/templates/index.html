@@ -80,7 +80,7 @@
                             <td class="truncate" title="{{ password.email }}">{{ password.email }}</td>
                             <td><span id="password-{{ password.id }}" class="decrypted-password">**********</span></td>
                             <td>
-                                <button class="btn btn-sm btn-info toggle-password-visibility" data-id="{{ password.id }}">View</button>
+                                <button type="button" class="btn btn-sm btn-info toggle-password-visibility" data-id="{{ password.id }}">View</button>
                                 <a href="{{ url_for('main.edit_password', password_id=password.id) }}" class="btn btn-sm btn-warning">Edit</a>
                                 <form action="{{ url_for('main.delete_password', password_id=password.id) }}" method="POST" class="d-inline">
                                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this password?')">Delete</button>
@@ -112,15 +112,26 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Build fields param from checked boxes
-    const fieldChecks = document.querySelectorAll('.search-fields input[type="checkbox"]');
+    // Build fields param from checked boxes (updated selector for new UI)
+    const fieldChecks = () => Array.from(document.querySelectorAll('#fieldSelector .custom-check-input'));
     const hiddenFields = document.getElementById('fields-hidden');
-    fieldChecks.forEach(cb => {
-        cb.addEventListener('change', () => {
-            const active = Array.from(fieldChecks).filter(c => c.checked).map(c => c.value);
-            hiddenFields.value = active.join(',');
+    function syncFieldsHidden(){
+        const active = fieldChecks().filter(c => c.checked).map(c => c.value);
+        hiddenFields.value = active.join(',');
+    }
+    fieldChecks().forEach(cb => cb.addEventListener('change', syncFieldsHidden));
+    syncFieldsHidden();
+    // Select all fields button
+    const selectAllBtn = document.querySelector('.select-all-fields');
+    if(selectAllBtn){
+        selectAllBtn.addEventListener('click', function(e){
+            e.preventDefault();
+            const all = fieldChecks();
+            const allChecked = all.every(c => c.checked);
+            all.forEach(c => c.checked = !allChecked);
+            syncFieldsHidden();
         });
-    });
+    }
 
     // Bulk selection logic
     const selectAll = document.getElementById('select-all');
@@ -139,7 +150,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const toggleButtons = document.querySelectorAll('.toggle-password-visibility');
 
     toggleButtons.forEach(button => {
-        button.addEventListener('click', function() {
+        button.addEventListener('click', function(e) {
+            e.preventDefault(); // prevent parent form submission
             const passwordId = this.getAttribute('data-id');
             const passwordSpan = document.getElementById(`password-${passwordId}`);
             const notesRow = document.getElementById(`notes-row-${passwordId}`);
