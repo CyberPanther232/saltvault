@@ -41,6 +41,11 @@ def create_app():
     if lifetime_seconds and lifetime_seconds.isdigit():
         from datetime import timedelta
         app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(seconds=int(lifetime_seconds))
+    # Reduce frequent refresh-induced session expiry
+    app.config['SESSION_REFRESH_EACH_REQUEST'] = False
+    # Sensible default for SameSite if not provided
+    if 'SESSION_COOKIE_SAMESITE' not in app.config:
+        app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
     # Expose issuer for TOTP provisioning (default: SaltVault)
     app.config['TOTP_ISSUER'] = os.environ.get('TOTP_ISSUER', 'SaltVault')

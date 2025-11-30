@@ -235,3 +235,12 @@ h2 {
 .progress-bar {
     transition: width 0.3s ease-in-out;
 }
+
+/* Ensure Bootstrap components use dark surfaces */
+.modal-content { background-color: var(--surface-color); color: var(--text-color); border:1px solid var(--border-color); }
+.dropdown-menu { background-color: var(--surface-color); color: var(--text-color); border:1px solid var(--border-color); }
+.list-group-item { background-color: var(--surface-color); color: var(--text-color); border-color: var(--border-color); }
+.card { background-color: var(--surface-color); color: var(--text-color); border-color: var(--border-color); }
+.bg-light { background-color: var(--surface-color) !important; }
+.navbar-light { background-color: var(--surface-color) !important; }
+.input-group-text { background-color: var(--surface-color); color: var(--text-color); border-color: var(--border-color); }
