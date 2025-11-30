@@ -17,26 +17,38 @@
         </div>
 
         <form class="search-form mb-3" method="GET" action="{{ url_for('main.index_route') }}">
-            <div class="row g-2 align-items-end">
-                <div class="col-md-4">
-                    <label for="search" class="form-label">Search</label>
-                    <input type="text" id="search" name="q" value="{{ q }}" class="form-control" placeholder="Search passwords...">
+            <div class="search-bar d-flex flex-wrap align-items-stretch">
+                <div class="flex-grow-1 mb-2 mb-md-0 mr-md-2">
+                    <div class="form-floating">
+                        <input type="text" id="search" name="q" value="{{ q }}" class="form-control" placeholder="Search passwords">
+                        <label for="search">Search</label>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">Fields</label>
-                    <div class="search-fields d-flex flex-wrap">
-                        {% set active = fields.split(',') if fields else [] %}
-                        {% for f in ['title','username','email','notes'] %}
-                        <div class="form-check me-3">
-                            <input class="form-check-input" type="checkbox" value="{{ f }}" id="field-{{ f }}" {% if f in active %}checked{% endif %}>
-                            <label class="form-check-label" for="field-{{ f }}">{{ f.title() }}</label>
+                <div class="field-selector-wrapper mb-2 mb-md-0 mr-md-2">
+                    <button type="button" class="btn btn-outline-primary field-toggle" data-toggle="collapse" data-target="#fieldSelector" aria-expanded="false" aria-controls="fieldSelector">Fields</button>
+                    <div id="fieldSelector" class="collapse field-selector shadow-sm mt-2">
+                        <div class="px-2 py-2">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <strong class="small text-muted">Filter Fields</strong>
+                                <button type="button" class="btn btn-xs btn-link p-0 select-all-fields">Select All</button>
+                            </div>
+                            {% set active = fields.split(',') if fields else [] %}
+                            <div class="row">
+                                {% for f in ['title','username','email','notes'] %}
+                                <div class="col-6 mb-1">
+                                    <div class="custom-check">
+                                        <input class="custom-check-input" type="checkbox" value="{{ f }}" id="field-{{ f }}" {% if f in active %}checked{% endif %}>
+                                        <label for="field-{{ f }}">{{ f.title() }}</label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
                         </div>
-                        {% endfor %}
                     </div>
                     <input type="hidden" name="fields" id="fields-hidden" value="{{ fields }}">
                 </div>
-                <div class="col-md-2 text-end">
-                    <button type="submit" class="btn btn-primary w-100">Apply</button>
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary search-submit">Search</button>
                 </div>
             </div>
         </form>
@@ -46,7 +58,12 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th style="width:32px;"><input type="checkbox" id="select-all"></th>
+                            <th style="width:42px;" class="select-all-col">
+                                <div class="select-all-wrapper" title="Select All">
+                                    <input type="checkbox" id="select-all" class="select-all-input">
+                                    <label for="select-all" class="select-all-label">All</label>
+                                </div>
+                            </th>
                             <th>Title</th>
                             <th>Username</th>
                             <th>Email</th>
