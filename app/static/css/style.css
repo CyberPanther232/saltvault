@@ -210,3 +210,24 @@ h2 {
 .progress-bar {
     transition: width 0.3s ease-in-out;
 }
+
+.modal-dark .modal-content {
+    background-color: var(--surface-color);
+    color: var(--text-color);
+}
+
+.modal-dark .modal-header {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-dark .modal-footer {
+    border-top: 1px solid var(--border-color);
+}
+
+.modal-dark .close {
+    color: var(--text-color);
+}
+
+.results-text {
+    color: var(--text-color) !important;
+}
