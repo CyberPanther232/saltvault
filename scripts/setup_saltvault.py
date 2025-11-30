@@ -13,6 +13,7 @@ Steps:
 import os
 import sys
 import subprocess
+import importlib
 from pathlib import Path
 from textwrap import dedent
 
@@ -23,14 +24,42 @@ DEFAULT_CERT = CERT_DIR / 'fullchain.pem'
 DEFAULT_KEY = CERT_DIR / 'privkey.pem'
 SELF_SIGNED_VALID_DAYS = 825  # ~27 months
 
-# Optional cryptography usage (fallback to openssl CLI if missing)
-try:
-    from cryptography import x509
-    from cryptography.x509.oid import NameOID
-    from cryptography.hazmat.primitives import hashes, serialization
-    from cryptography.hazmat.primitives.asymmetric import rsa
-except ImportError:  # cryptography not installed
-    x509 = None
+# Lazy cryptography import; we'll attempt auto-install if missing.
+x509 = None
+NameOID = None
+hashes = None
+serialization = None
+rsa = None
+
+def ensure_python_dependencies():
+    """Ensure Python modules required for optional features are installed.
+    Currently only 'cryptography' is needed for in-Python self-signed cert generation.
+    Falls back to 'openssl' if installation fails or module absent.
+    """
+    global x509, NameOID, hashes, serialization, rsa
+    try:
+        import cryptography  # noqa: F401
+    except ImportError:
+        print("'cryptography' not found. Attempting installation...")
+        # Choose pip invocation method
+        py_exec = sys.executable or 'python'
+        try:
+            subprocess.run([py_exec, '-m', 'pip', 'install', '--upgrade', 'pip'], check=False)
+            subprocess.run([py_exec, '-m', 'pip', 'install', 'cryptography'], check=True)
+            print("Installed 'cryptography'.")
+        except Exception as e:
+            print(f"Failed to install 'cryptography': {e}. Will fallback to openssl CLI if available.")
+            return
+    # Attempt import after install
+    try:
+        from cryptography import x509 as _x509
+        from cryptography.x509.oid import NameOID as _NameOID
+        from cryptography.hazmat.primitives import hashes as _hashes, serialization as _serialization
+        from cryptography.hazmat.primitives.asymmetric import rsa as _rsa
+        x509, NameOID, hashes, serialization, rsa = _x509, _NameOID, _hashes, _serialization, _rsa
+    except Exception as e:
+        print(f"Unexpected error importing cryptography modules: {e}. Will fallback to openssl CLI.")
+        x509 = None
 
 
 def header(title: str):
@@ -43,6 +72,9 @@ def ensure_docker():
     except Exception:
         print("Docker is required. Please install Docker and re-run this script.")
         sys.exit(1)
+
+def have_openssl() -> bool:
+    return subprocess.run(['openssl','version'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
 
 
 def prompt_domain() -> str:
@@ -62,14 +94,18 @@ def prompt_ssl_mode() -> str:
 def generate_self_signed(domain: str):
     CERT_DIR.mkdir(parents=True, exist_ok=True)
     if x509 is None:
-        print("cryptography not available; using openssl CLI fallback.")
-        cmd = [
-            'openssl', 'req', '-x509', '-nodes', '-newkey', 'rsa:4096',
-            '-days', str(SELF_SIGNED_VALID_DAYS), '-subj', f'/CN={domain}',
-            '-keyout', str(DEFAULT_KEY), '-out', str(DEFAULT_CERT)
-        ]
-        subprocess.run(cmd, check=True)
-        return
+        if have_openssl():
+            print("Using openssl CLI to generate self-signed certificate (cryptography not available).")
+            cmd = [
+                'openssl', 'req', '-x509', '-nodes', '-newkey', 'rsa:4096',
+                '-days', str(SELF_SIGNED_VALID_DAYS), '-subj', f'/CN={domain}',
+                '-keyout', str(DEFAULT_KEY), '-out', str(DEFAULT_CERT)
+            ]
+            subprocess.run(cmd, check=True)
+            return
+        else:
+            print("Neither 'cryptography' nor 'openssl' are available; cannot generate self-signed certificate.")
+            sys.exit(1)
     key = rsa.generate_private_key(public_exponent=65537, key_size=4096)
     subject = issuer = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, domain)])
     cert = (x509.CertificateBuilder()
@@ -163,6 +199,7 @@ def post_setup(domain: str, ssl_mode: str):
 def main():
     header("SaltVault Deployment Setup")
     ensure_docker()
+    ensure_python_dependencies()
     domain = prompt_domain()
     ssl_mode = prompt_ssl_mode()
 
