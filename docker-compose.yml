@@ -17,8 +17,8 @@ services:
       - WORKERS=3
       - THREADS=2
     volumes:
-      - ./app/data:/app/data
-      - ./app/logs:/app/logs
+      - ./appdata:/app/data
+      - ./logdata:/app/logs
       # Persist instance folder to retain generated secret_key across container restarts
       - ./instance:/app/instance
     restart: unless-stopped
