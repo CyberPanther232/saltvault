@@ -2,9 +2,9 @@
 
 ![SaltVault Logo](./salt_vault_repo_logo.png)
 
-**Version:** 1.0.0
+**Version:** Beta - 1.0.0
 
-A secure and private password manager built with Flask and love.
+A secure, lightweight, and containerized private password manager built with Flask. This application utilizes the PyNACL library to perform fast effective encryption and decryption of passwords stored via users. This project is intended to showcase an understanding of secure software development, encryption algorithms, and provide an effective solution for those seeking to utilize a free password manager that does not create a ton of overhead on a user's device. This project is currently in a beta phase and is still under development.
 
 ## Features
 
