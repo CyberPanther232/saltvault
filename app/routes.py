@@ -213,7 +213,8 @@ def mfa_setup():
         return redirect(url_for('main.setup'))
 
     totp = pyotp.TOTP(user['mfa_secret'])
-    provisioning_uri = totp.provisioning_uri(name=email, issuer_name='SaltVault')
+    issuer = os.environ.get('TOTP_ISSUER') or 'SaltVault'
+    provisioning_uri = totp.provisioning_uri(name=email, issuer_name=issuer)
     
     qr = qrcode.make(provisioning_uri)
     buffered = io.BytesIO()
