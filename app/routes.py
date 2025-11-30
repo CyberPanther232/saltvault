@@ -334,7 +334,7 @@ def verify_mfa():
         session.pop('username_for_mfa_setup', None)
         session.pop('email_for_mfa_setup', None)
         session.pop('pending_backup_codes', None)  # Remove codes so not shown again
-        flash('Setup complete! Please log in to continue.', 'success')
+        flash('MFA setup successful! Please log in to continue.', 'success')
         return redirect(url_for('main.login'))
     else:
         flash('Invalid TOTP.', 'danger')

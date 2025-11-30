@@ -17,7 +17,7 @@
 	</ul>
 	{% endif %}
 	<form method="post" action="{{ url_for('main.regenerate_backup_codes') }}" class="mt-2">
-		<button type="submit" class="btn btn-sm btn-secondary">Generate New Backup Codes</button>
+		<button type="submit" class="btn btn-sm btn-secondary mt-3">Generate New Backup Codes</button>
 	</form>
 </section>
 
@@ -37,7 +37,7 @@
 			<label for="backup_code">Unused Backup Code (alternative)</label>
 			<input type="text" class="form-control" id="backup_code" name="backup_code" placeholder="Backup code if TOTP unavailable">
 		</div>
-		<button type="submit" class="btn btn-danger">Regenerate MFA Secret</button>
+		<button type="submit" class="btn btn-danger mt-3">Regenerate MFA Secret</button>
 	</form>
 </section>
 
@@ -54,7 +54,7 @@
 	{% if discord_configured %}
 		<p class="text-success">Discord webhook is configured.</p>
 		<form method="post" action="{{ url_for('main.test_discord') }}" class="mb-3">
-			<button type="submit" class="btn btn-sm btn-primary">Send Test Discord Notification</button>
+			<button type="submit" class="btn btn-sm btn-primary mt-3">Send Test Discord Notification</button>
 		</form>
 	{% else %}
 		<p class="text-warning">No Discord webhook configured.</p>
@@ -68,7 +68,7 @@
 			<label for="password">Confirm Password</label>
 			<input type="password" class="form-control" id="password" name="password" required>
 		</div>
-		<button type="submit" class="btn btn-sm btn-secondary mt-2">Save & Test Webhook</button>
+		<button type="submit" class="btn btn-sm btn-secondary mt-3">Save & Test Webhook</button>
 	</form>
 	<hr>
 	<h5>Notification Preferences</h5>
@@ -104,7 +104,7 @@
 				</tr>
 			</tbody>
 		</table>
-		<button type="submit" class="btn btn-sm btn-primary">Save Notification Preferences</button>
+		<button type="submit" class="btn btn-sm btn-primary mt-3">Save Notification Preferences</button>
 	</form>
 </section>
 {% endblock %}
