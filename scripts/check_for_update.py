@@ -18,6 +18,7 @@ import subprocess
 from pathlib import Path
 from datetime import datetime
 import shutil
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 BACKUP_DIR = ROOT / 'backups'
@@ -72,26 +73,49 @@ def ahead_behind(branch: str):
 
 
 def make_backup():
+  """Create a zip backup of the working tree excluding protected paths and existing backups.
+  Uses a manual zip walk to avoid including the new archive itself and to skip large / sensitive paths.
+  """
   BACKUP_DIR.mkdir(parents=True, exist_ok=True)
   stamp = datetime.now().strftime('%Y%m%d-%H%M%S')
-  backup_zip = BACKUP_DIR / f'backup-{stamp}'
-  print(f'Creating backup: {backup_zip}.zip')
+  backup_zip_path = BACKUP_DIR / f'backup-{stamp}.zip'
+  print(f'Creating backup: {backup_zip_path}')
 
-  def _filter(src, names):
-    # Exclude protected directories/files from backup
-    excluded = set()
-    for name in list(names):
-      rel = os.path.relpath(os.path.join(src, name), start=ROOT)
-      rel_norm = rel.replace('\\', '/')
-      for p in PROTECT_PATHS:
-        if rel_norm == p or rel_norm.startswith(p + '/'):
-          excluded.add(name)
-          break
-    return excluded
+  exclude_roots = set(PROTECT_PATHS + ['backups'])  # also skip previous backups
 
-  shutil.make_archive(str(backup_zip), 'zip', root_dir=ROOT, base_dir='.', logger=None)
-  print('Backup complete.')
-  return str(backup_zip) + '.zip'
+  def should_exclude(rel: str) -> bool:
+    rel = rel.replace('\\', '/')
+    for p in exclude_roots:
+      if rel == p or rel.startswith(p + '/'):
+        return True
+    return False
+
+  files_added = 0
+  with zipfile.ZipFile(backup_zip_path, 'w', compression=zipfile.ZIP_DEFLATED) as zf:
+    for root, dirs, files in os.walk(ROOT):
+      rel_root = os.path.relpath(root, ROOT)
+      rel_root_norm = '.' if rel_root == '.' else rel_root.replace('\\', '/')
+      # Prune excluded directories early to avoid traversal cost
+      pruned = []
+      for d in list(dirs):
+        rel_dir = f'{rel_root_norm}/{d}' if rel_root_norm != '.' else d
+        if should_exclude(rel_dir):
+          dirs.remove(d)
+          pruned.append(d)
+      for f in files:
+        rel_file = f'{rel_root_norm}/{f}' if rel_root_norm != '.' else f
+        if should_exclude(rel_file):
+          continue
+        # Skip the archive we are currently writing if our walk sees it (edge case)
+        if backup_zip_path.name == f and rel_root_norm == 'backups':
+          continue
+        abs_path = os.path.join(root, f)
+        zf.write(abs_path, rel_file)
+        files_added += 1
+        if files_added % 250 == 0:
+          print(f'  Added {files_added} files...')
+  print(f'Backup complete. {files_added} file(s) archived.')
+  return str(backup_zip_path)
 
 
 def prompt_yes_no(msg: str, default='n') -> bool:
