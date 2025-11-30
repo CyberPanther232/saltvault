@@ -5,9 +5,21 @@ services:
     command: gunicorn --workers 3 --threads 2 --bind 0.0.0.0:5000 main:app
     environment:
       - FLASK_APP=main.py
+      - FLASK_ENV=production
+      - DEBUG=False
       - DATABASE_PATH=/app/app/data/dev_database.db
+      - SESSION_COOKIE_SECURE=True
+      - SESSION_COOKIE_HTTPONLY=True
+      - SESSION_COOKIE_SAMESITE=Strict
+      - PERMANENT_SESSION_LIFETIME=3600
+      - TOTP_ISSUER=SaltVault
+      - LOG_LEVEL=INFO
+      - WORKERS=3
+      - THREADS=2
     volumes:
       - ./app/data:/app/app/data
+      # Persist instance folder to retain generated secret_key across container restarts
+      - ./instance:/app/instance
     restart: unless-stopped
 
   nginx:
