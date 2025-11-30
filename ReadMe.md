@@ -13,12 +13,12 @@ A secure, lightweight, and containerized private password manager built with Fla
 *   **Password Generator:** Create strong, random passwords with customizable criteria.
 *   **Password Strength Meter:** Get immediate feedback on the strength of your passwords.
 *   **CSV Export:** Export your passwords to a CSV file compatible with other password managers.
+*   **Password Filtering/Search:** Search through your list of passwords to view.
 *   **Dark Theme:** A modern, dark theme for a pleasant user experience.
 
 ## Upcoming Features
 
 *   [ ] Browser extensions
-*   [ ] Mobile applications
 *   [ ] Secure sharing of passwords
 *   [ ] Password history and audit
 *   [ ] Locally Hosted Application
@@ -68,3 +68,4 @@ A secure, lightweight, and containerized private password manager built with Fla
 4.  **Add Password:** Click the "Add Password" button to add a new entry. You can use the built-in password generator to create a strong password.
 5.  **View/Edit/Delete:** Use the buttons on each row to view, edit, or delete a password entry.
 6.  **Export:** You can export all your passwords to a CSV file from the "Export to CSV" button on the dashboard. You will be prompted to re-enter your password and MFA code for security.
+7.  **Import:** You can import csv or json files with password lists from other password managers. Currently, the only supported managers are NordPass and BitWarden. I am working to add more
