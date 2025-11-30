@@ -10,56 +10,115 @@
 
         <h2>Password Manager</h2>
 
-        <a href="{{ url_for('main.add_password') }}" class="btn btn-primary mb-3">Add Password</a>
-        <a href="{{ url_for('main.export_passwords') }}" class="btn btn-secondary mb-3">Export to CSV</a>
-        <a href="{{ url_for('main.import_passwords') }}" class="btn btn-info mb-3">Import from CSV</a>
-        
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Password</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for password in passwords %}
-                <tr class="password-row">
-                    <td>{{ password.title }}</td>
-                    <td>{{ password.username }}</td>
-                    <td>{{ password.email }}</td>
-                    <td>
-                        <span id="password-{{ password.id }}" class="decrypted-password">**********</span>
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-info toggle-password-visibility" data-id="{{ password.id }}">View</button>
-                        <a href="{{ url_for('main.edit_password', password_id=password.id) }}" class="btn btn-sm btn-warning">Edit</a>
-                        <form action="{{ url_for('main.delete_password', password_id=password.id) }}" method="POST" style="display: inline-block;">
-                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this password?')">Delete</button>
-                        </form>
-                    </td>
-                </tr>
-                <tr class="notes-row" id="notes-row-{{ password.id }}" style="display: none;">
-                    <td colspan="5">
-                        <strong>Notes:</strong>
-                        <p id="notes-content-{{ password.id }}"></p>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="5">No passwords found.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="toolbar mb-3">
+            <a href="{{ url_for('main.add_password') }}" class="btn btn-primary me-2">Add Password</a>
+            <a href="{{ url_for('main.export_passwords') }}" class="btn btn-secondary me-2">Export CSV</a>
+            <a href="{{ url_for('main.import_passwords') }}" class="btn btn-info me-2">Import CSV</a>
+        </div>
+
+        <form class="search-form mb-3" method="GET" action="{{ url_for('main.index_route') }}">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-4">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" id="search" name="q" value="{{ q }}" class="form-control" placeholder="Search passwords...">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Fields</label>
+                    <div class="search-fields d-flex flex-wrap">
+                        {% set active = fields.split(',') if fields else [] %}
+                        {% for f in ['title','username','email','notes'] %}
+                        <div class="form-check me-3">
+                            <input class="form-check-input" type="checkbox" value="{{ f }}" id="field-{{ f }}" {% if f in active %}checked{% endif %}>
+                            <label class="form-check-label" for="field-{{ f }}">{{ f.title() }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="fields" id="fields-hidden" value="{{ fields }}">
+                </div>
+                <div class="col-md-2 text-end">
+                    <button type="submit" class="btn btn-primary w-100">Apply</button>
+                </div>
+            </div>
+        </form>
+
+        <form id="bulk-delete-form" method="POST" action="{{ url_for('main.bulk_delete_passwords') }}">
+            <div class="table-container mb-2">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th style="width:32px;"><input type="checkbox" id="select-all"></th>
+                            <th>Title</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Password</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for password in passwords %}
+                        <tr class="password-row">
+                            <td><input type="checkbox" class="row-select" name="selected_ids" value="{{ password.id }}"></td>
+                            <td class="truncate" title="{{ password.title }}">{{ password.title }}</td>
+                            <td class="truncate" title="{{ password.username }}">{{ password.username }}</td>
+                            <td class="truncate" title="{{ password.email }}">{{ password.email }}</td>
+                            <td><span id="password-{{ password.id }}" class="decrypted-password">**********</span></td>
+                            <td>
+                                <button class="btn btn-sm btn-info toggle-password-visibility" data-id="{{ password.id }}">View</button>
+                                <a href="{{ url_for('main.edit_password', password_id=password.id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                <form action="{{ url_for('main.delete_password', password_id=password.id) }}" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this password?')">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        <tr class="notes-row" id="notes-row-{{ password.id }}" style="display: none;">
+                            <td colspan="6">
+                                <strong>Notes:</strong>
+                                <p id="notes-content-{{ password.id }}"></p>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6">No passwords found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div><small class="text-muted">Showing {{ passwords|length }} result(s)</small></div>
+                <button type="submit" id="bulk-delete-btn" class="btn btn-danger" disabled onclick="return confirm('Delete selected passwords?')">Delete Selected</button>
+            </div>
+        </form>
     </div>
 {% endblock %}
 
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // Build fields param from checked boxes
+    const fieldChecks = document.querySelectorAll('.search-fields input[type="checkbox"]');
+    const hiddenFields = document.getElementById('fields-hidden');
+    fieldChecks.forEach(cb => {
+        cb.addEventListener('change', () => {
+            const active = Array.from(fieldChecks).filter(c => c.checked).map(c => c.value);
+            hiddenFields.value = active.join(',');
+        });
+    });
+
+    // Bulk selection logic
+    const selectAll = document.getElementById('select-all');
+    const rowSelects = document.querySelectorAll('.row-select');
+    const bulkBtn = document.getElementById('bulk-delete-btn');
+    function updateBulkState(){
+        const anyChecked = Array.from(rowSelects).some(r => r.checked);
+        bulkBtn.disabled = !anyChecked;
+    }
+    selectAll && selectAll.addEventListener('change', () => {
+        rowSelects.forEach(r => r.checked = selectAll.checked);
+        updateBulkState();
+    });
+    rowSelects.forEach(r => r.addEventListener('change', updateBulkState));
+
     const toggleButtons = document.querySelectorAll('.toggle-password-visibility');
 
     toggleButtons.forEach(button => {

@@ -1,3 +1,4 @@
+# External imports
 import os
 import csv
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify, Response
@@ -7,14 +8,16 @@ import qrcode
 import io
 import base64
 from werkzeug.security import generate_password_hash, check_password_hash
+import random
+
+# Internal imports
 from .init_db import get_db
 from .models import User
 from .nacl_tools import encrypt_data, decrypt_data, derive_key, generate_salt
 from .logging_functions import get_logger, log_event
 from .password_generator import generate_password, strengthen_password, check_password_strength
 from .quotes import quotes
-import random
-
+from .process_import import *
 main = Blueprint('main', __name__)
 
 login_manager = LoginManager()
@@ -42,11 +45,10 @@ def load_user(user_id):
 @main.route('/')
 @login_required
 def index_route():
-    
     if request.method != 'GET':
         log_event('METHOD_NOT_ALLOWED', 'Attempted to access / with non-GET method', severity='WARNING')
         return "Method not allowed 405", 405
-    
+
     db = get_db()
     key = get_key()
     if not key:
@@ -54,25 +56,70 @@ def index_route():
         log_event('SESSION_EXPIRED', f'Session expired for user ID {current_user.id}', severity='WARNING')
         return redirect(url_for('main.logout'))
 
+    # Search params
+    query = request.args.get('q', '').strip()
+    fields_param = request.args.get('fields', '').strip()
+    allowed_fields = {'title', 'username', 'email', 'notes'}
+    active_fields = [f for f in fields_param.split(',') if f in allowed_fields]
+    if query and not active_fields:
+        # Default to all if user provided query but no fields
+        active_fields = list(allowed_fields)
+
     encrypted_passwords = db.execute('SELECT * FROM passwords WHERE user_id = ?', (current_user.id,)).fetchall()
     passwords = []
     for p in encrypted_passwords:
         try:
-            passwords.append({
+            dec_title = decrypt_data(key, p['title'])
+            dec_username = decrypt_data(key, p['username'])
+            dec_email = decrypt_data(key, p['email'])
+            dec_notes = decrypt_data(key, p['notes']) if p['notes'] else ''
+            record = {
                 'id': p['id'],
-                'title': decrypt_data(key, p['title']),
-                'username': decrypt_data(key, p['username']),
-                'email': decrypt_data(key, p['email']),
-                'notes': decrypt_data(key, p['notes']) if p['notes'] else '',
-                'password': '**********',
-            })
+                'title': dec_title,
+                'username': dec_username,
+                'email': dec_email,
+                'notes': dec_notes,
+                'password': '**********'
+            }
+            # Apply filtering
+            if query:
+                q_lower = query.lower()
+                match = any(record[f].lower().find(q_lower) != -1 for f in active_fields)
+                if not match:
+                    continue
+            passwords.append(record)
         except Exception:
             log_event('DECRYPTION_ERROR', f'Failed to decrypt password ID {p["id"]} for user ID {current_user.id}', severity='ERROR')
             pass
-    
+
     random_quote = random.choice(quotes)
-    
-    return render_template('index.html', passwords=passwords, quote=random_quote)
+    return render_template('index.html', passwords=passwords, quote=random_quote, q=query, fields=','.join(active_fields))
+
+@main.route('/bulk-delete', methods=['POST'])
+@login_required
+def bulk_delete_passwords():
+    ids = request.form.getlist('selected_ids')
+    if not ids:
+        flash('No passwords selected for deletion.', 'warning')
+        log_event('BULK_DELETE_NO_SELECTION', f'User {current_user.username} submitted bulk delete with no selection', severity='WARNING')
+        return redirect(url_for('main.index_route'))
+    try:
+        db = get_db()
+        # Ensure IDs are integers to prevent SQL issues
+        clean_ids = [int(i) for i in ids if i.isdigit()]
+        if not clean_ids:
+            flash('Invalid selection.', 'danger')
+            log_event('BULK_DELETE_INVALID_IDS', f'User {current_user.username} provided invalid IDs in bulk delete', severity='ERROR')
+            return redirect(url_for('main.index_route'))
+        placeholders = ','.join('?' for _ in clean_ids)
+        db.execute(f'DELETE FROM passwords WHERE user_id = ? AND id IN ({placeholders})', [current_user.id, *clean_ids])
+        db.commit()
+        flash(f'Deleted {len(clean_ids)} password(s).', 'success')
+        log_event('BULK_DELETE_SUCCESS', f'User {current_user.username} deleted {len(clean_ids)} passwords', severity='INFO')
+    except Exception as e:
+        log_event('BULK_DELETE_ERROR', f'Bulk delete error for user {current_user.username}: {e}', severity='ERROR')
+        flash(f'Error deleting selected passwords: {e}', 'danger')
+    return redirect(url_for('main.index_route'))
 
 @main.route('/setup', methods=['GET', 'POST'])
 def setup():
@@ -571,10 +618,22 @@ def import_passwords():
         return render_template('import.html')
 
     # POST: handle CSV upload (basic placeholder)
-    file = request.files.get('file')
-    if not file or file.filename == '':
+    file = request.files.get('csv_file')  # matches name attribute in template
+    if not file or file.filename.strip() == '':
         flash('No file selected.', 'warning')
         log_event('IMPORT_NO_FILE', f'User {current_user.username} submitted import without file', severity='WARNING')
+        return redirect(url_for('main.import_passwords'))
+    
+    if not (file.filename.endswith('.csv') or file.filename.endswith('.json')):
+        flash('Unsupported file type. Please upload a CSV or JSON file.', 'danger')
+        log_event('IMPORT_UNSUPPORTED_FILE_TYPE', f'User {current_user.username} attempted import with unsupported file type: {file.filename}', severity='WARNING')
+        return redirect(url_for('main.import_passwords'))
+    
+    # For now support the CSV layout from the UI (name,login_username,login_password,login_uri,notes)
+    filename_lower = file.filename.lower()
+    if not filename_lower.endswith('.csv'):
+        flash('Only .csv files are supported for import.', 'danger')
+        log_event('IMPORT_UNSUPPORTED_EXTENSION', f'User {current_user.username} attempted import with file {file.filename}', severity='WARNING')
         return redirect(url_for('main.import_passwords'))
 
     try:
@@ -582,27 +641,40 @@ def import_passwords():
         if not key:
             return redirect(url_for('main.logout'))
 
-        stream = io.StringIO(file.stream.read().decode('utf-8'))
+        # Read uploaded CSV directly
+        file.stream.seek(0)
+        decoded = file.stream.read().decode('utf-8', errors='replace')
+        stream = io.StringIO(decoded)
         reader = csv.DictReader(stream)
         db = get_db()
 
+        row_count = 0
         for row in reader:
+            # Skip empty header rows
+            if not any(row.values()):
+                continue
             title = row.get('name', '')
-            login_username = row.get('login_username', '')
-            login_password = row.get('login_password', '')
-            login_uri = row.get('login_uri', '')
+            username = row.get('login_username', '')
+            password_val = row.get('login_password', '')
+            email_or_uri = row.get('login_uri', '')
             notes = row.get('notes', '')
 
             enc_title = encrypt_data(key, title).hex()
-            enc_username = encrypt_data(key, login_username).hex()
-            enc_password = encrypt_data(key, login_password).hex()
-            enc_email = encrypt_data(key, login_uri).hex()
+            enc_username = encrypt_data(key, username).hex()
+            enc_password = encrypt_data(key, password_val).hex()
+            enc_email = encrypt_data(key, email_or_uri).hex()
             enc_notes = encrypt_data(key, notes).hex() if notes else None
 
             db.execute(
                 'INSERT INTO passwords (user_id, title, username, password, email, notes) VALUES (?, ?, ?, ?, ?, ?)',
                 (current_user.id, enc_title, enc_username, enc_password, enc_email, enc_notes)
             )
+            row_count += 1
+
+        if row_count == 0:
+            flash('No rows found in CSV.', 'warning')
+            log_event('IMPORT_EMPTY_FILE', f'User {current_user.username} uploaded empty CSV', severity='WARNING')
+            return redirect(url_for('main.import_passwords'))
 
         db.commit()
         flash('Passwords imported successfully.', 'success')

@@ -19,6 +19,23 @@ body {
     font-size: 1.1rem; /* Increased base font size */
 }
 
+.toolbar .btn { margin-right: .5rem; }
+
+.search-form { background: var(--surface-color); padding: 1rem 1.25rem; border:1px solid var(--border-color); border-radius:.5rem; }
+.search-fields .form-check { margin-bottom: .25rem; }
+
+.table-container { max-height: 600px; overflow-y: auto; border:1px solid var(--border-color); border-radius:.5rem; }
+.table-container::-webkit-scrollbar { width: 10px; }
+.table-container::-webkit-scrollbar-track { background: #1e1e1e; }
+.table-container::-webkit-scrollbar-thumb { background: #444; border-radius: 5px; }
+
+.truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+.password-row td { vertical-align: middle; }
+
+.notes-row p { max-height: 150px; overflow-y: auto; }
+.notes-row p::-webkit-scrollbar { width: 8px; }
+.notes-row p::-webkit-scrollbar-thumb { background: #555; border-radius:4px; }
+
 h2 {
     font-size: 2.5rem;
     font-weight: 700;
