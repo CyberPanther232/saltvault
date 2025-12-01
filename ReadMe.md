@@ -4,206 +4,174 @@
 
 **Version:** Beta - 1.1.2
 
-A secure, lightweight, and containerized private password manager built with Flask. This application utilizes the PyNACL library to perform fast effective encryption and decryption of passwords stored within the application. This project is intended to showcase an understanding of secure software development, encryption algorithms, and provide an effective solution for those seeking to utilize a free password manager that does not create a ton of overhead on a user's device. This project is currently in a beta phase and is still under development.
+SaltVault is a secure, lightweight, and containerized private password manager built with Flask. It focuses on minimal trusted surface area: secret material (passwords) is encrypted in the browser using a key derived from your master password and is stored encrypted on the server. SaltVault also supports TOTP-based two-factor authentication to protect account access.
 
-## Features
 
-* **End-to-End Encryption:** Your passwords are encrypted and decrypted on the client-side, using a key derived from your master password.
-* **Two-Factor Authentication (2FA):** Secure your account with TOTP-based two-factor authentication.
-* **Password Generator:** Create strong, random passwords with customizable criteria.
-* **Password Strength Meter:** Get immediate feedback on the strength of your passwords.
-* **CSV Export:** Export your passwords to a CSV file compatible with other password managers.
-* **Password Filtering/Search:** Search through your list of passwords to view.
-* **Dark Theme:** A modern, dark theme for a pleasant user experience.
+## Core Features
 
-## Upcoming Features
+- End-to-End Encryption: Passwords are encrypted in the client/browser; the server stores ciphertext only.
+- Two-Factor Authentication (2FA): TOTP-based 2FA compatible with standard authenticator apps.
+- Secure Storage: Encrypted entries are stored in an SQLite database (configurable path).
+- Simple, self-hostable architecture: Docker Compose or local Python execution supported.
 
-* [ ] Browser extensions
-* [ ] Secure sharing of passwords
-* [ ] Password history and audit
-* [ ] Locally Hosted Application
+(Deprecated or removed features such as a dedicated dark theme, built-in password generator, password strength meter, and named importers for specific third-party tools have been removed from this README because they are not present in the current codebase.)
 
-## Getting Started
+---
 
-### Prerequisites
+## Quick Start
 
-* [Python 3.12+](https://www.python.org/)
-* [Docker](https://www.docker.com/get-started) and [Docker Compose](https://docs.docker.com/compose/install/)
+Choose one of the following deployment options.
 
-### Installation
-
-1. **Clone the repository:**
-
+A. Production (recommended): Docker Compose
+1. Clone the repository
    ```bash
-   git clone https://www.github.com/CyberPanther232/saltvault
+   git clone https://github.com/CyberPanther232/saltvault
    cd saltvault
    ```
-2. **Set up the environment:**
-
-   - Rename `app.env.example` to `app.env`.
-   - For production, it is recommended to change the `DATABASE_PATH` to a location outside of the `app` directory.
-3. **SSL Certificates (for production with Docker) - CloudFlare Recommended:**
-
-   - If you are using CloudFlare, ensure you generate a new certificate to host on the server/workstation you run this application on.
-   - SSL/TLS is highly recommended for using this application. Even if hosted locally on your own machine.
-   - Place your SSL certificate (`fullchain.pem`) and private key (`privkey.pem`) in the `nginx/certs/` directory.
-   - Update `nginx/nginx.conf` with your domain name.
-4. **Automated Setup (Optional – Recommended for Docker Production):**
-   You can use the provided setup scripts to streamline configuration (domain, SSL mode, certificates, nginx config, Docker Compose). These scripts will:
-
-   - Detect whether `docker compose` plugin or legacy `docker-compose` binary is available.
-   - Auto-install required Python dependencies (e.g., `cryptography`) in the Python version.
-   - Generate a persistent Flask `SECRET_KEY` file to keep sessions & MFA stable (do not delete `instance/secret_key`).
-   - Render `nginx/nginx.conf` from the template and handle certificates based on your selection.
-   - Optionally generate a self-signed certificate if you choose that mode.
-   - Warn and abort cleanly if Docker Compose is missing.
-
-   SSL Mode Options during scripted setup:
-
-   - `cloudflare`: Use Cloudflare-origin certs you place into `nginx/certs/`.
-   - `existing`: Use existing `fullchain.pem` and `privkey.pem` in `nginx/certs/`.
-   - `self-signed`: Auto-generate a self-signed certificate (suitable for internal/testing use).
-
-   Python (cross-platform):
-
+2. Copy the environment template and edit:
    ```bash
-   python scripts/setup_saltvault.py
+   cp app/app.env.example app/app.env
+   # or if app/app.env.example is at the repo root:
+   # cp app.env.example app.env
+   ```
+   - Set `DATABASE_PATH` to a persistent path outside your repo for production (e.g., `/var/lib/saltvault/saltvault.db`).
+   - Set `APP_DOMAIN` and `SSL_MODE` as needed for HTTPS.
+
+3. Place certificates (production):
+   - Put `fullchain.pem` and `privkey.pem` into `nginx/certs/` if you use `SSL_MODE=existing` or Cloudflare origin certs. The setup script or your deploy process can handle this per your environment.
+
+4. Start containers:
+   ```bash
+   # If using legacy docker-compose
+   docker-compose up -d
+   # Or with the docker Compose plugin:
+   docker compose up -d
    ```
 
-   After the script completes, it will run (or instruct you to run) Docker Compose. Access the site via `https://<your-domain>` (or the chosen host). On first visit you will be guided through master account + MFA setup.
-5. **Run the application (Manual path):**
+B. Local development (no Docker)
+1. Create and activate a virtual environment:
+   ```bash
+   python -m venv .env
+   source .env/bin/activate      # macOS / Linux
+   # .\.env\Scripts\activate     # Windows PowerShell / CMD
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Initialize the database and start:
+   ```bash
+   flask init-db
+   python main.py
+   ```
+   The app will run on the configured host/port (default 0.0.0.0:8080 for the dev server).
 
-   - **With Docker (recommended for production):**
-     ```bash
-     docker-compose up -d
-     ```
-   - **Locally (for development):**
-     - Create a virtual environment: `python -m venv .env`
-     - Activate it: `source .env/bin/activate` (or `.\.env\Scripts\activate` on Windows)
-     - Install dependencies: `pip install -r requirements.txt`
-     - Initialize the database: `flask init-db`
-     - Run the app: `python main.py`
+C. Automated setup script
+A helper script at `scripts/setup_saltvault.py` assists with rendering nginx configuration, creating a persistent secret key under `instance/secret_key`, detecting/validating Docker Compose, and optionally generating self-signed certs. Run:
 
-## Usage
+```bash
+python scripts/setup_saltvault.py
+```
 
-1. **Initial Setup:** The first time you access the application, you will be prompted to create a master account and set up two-factor authentication.
-2. **Login:** Log in with your master password and a TOTP code from your authenticator app.
-3. **Dashboard:** The main dashboard displays all your stored passwords.
-4. **Add Password:** Click the "Add Password" button to add a new entry. You can use the built-in password generator to create a strong password.
-5. **View/Edit/Delete:** Use the buttons on each row to view, edit, or delete a password entry.
-6. **Export:** You can export all your passwords to a CSV file from the "Export to CSV" button on the dashboard. You will be prompted to re-enter your password and MFA code for security.
-7. **Import:** You can import csv or json files with password lists from other password managers. Currently, the only supported managers are NordPass and BitWarden. I am working to add more
+---
+
+## First-time Use & Typical Workflow
+
+1. First visit
+   - Open your browser to the app domain (e.g., https://vault.example.com) or http://localhost:8080 for local dev.
+   - You will be guided to create a master account. Choose a strong master password — this is used to derive encryption keys in the browser.
+
+2. Enable two-factor authentication (TOTP)
+   - During or immediately after account creation you will be prompted to set up TOTP 2FA. Scan the QR code with your authenticator app and save recovery codes if provided.
+
+3. Add a password entry
+   - From the dashboard, choose "Add Password" (or similar).
+   - Enter the name, username, URL, and any notes. The plaintext password field is encrypted client-side before being sent to the server.
+
+4. View an entry
+   - Click the view/decrypt action for a given row. The decryption happens locally in your browser session after verifying your master password (or session-derived key).
+
+5. Edit or delete
+   - Edit: Modify the entry fields in the UI; on save the updated plaintext is encrypted client-side and replaced on the server.
+   - Delete: Permanently removes the entry from the database.
+
+6. Export / Import (if enabled)
+   - Export: If the installation supports export, the application will require re-authentication (master password and TOTP) prior to exporting your data. Exported files may be plaintext CSV or JSON formatted depending on the chosen export mode — treat exported data as highly sensitive.
+   - Import: Import functionality accepts generic CSV or JSON import files when available. Validate imported data carefully before trusting or deleting originals.
+
+Security note: Always keep exported files and backups under strict access control. Exported data is plaintext and should be handled like any other secret.
+
+---
 
 ## Environment Variables
 
-SaltVault reads configuration from environment variables (or `app.env`). A full template lives in `app/app.env.example`.
+SaltVault reads settings from environment variables (or an env file). See `app/app.env.example` for a full template.
 
-### Core Application
+Some key variables:
 
-| Variable      | Description                      | Prod Example   |
-| ------------- | -------------------------------- | -------------- |
-| `FLASK_ENV` | Flask environment mode           | `production` |
-| `DEBUG`     | Debug features (disable in prod) | `False`      |
-| `HOST`      | Bind interface (dev server)      | `0.0.0.0`    |
-| `PORT`      | Dev server port (not gunicorn)   | `8080`       |
+- FLASK_ENV — application environment (development / production)
+- DEBUG — debug mode flag (False in production)
+- HOST / PORT — dev server binding
+- DATABASE_PATH — SQLite DB path (use a persistent external path in production)
+- SECRET_KEY — optional override for the instance secret file; prefer letting the app create and manage `instance/secret_key`
+- SESSION_COOKIE_SECURE — set True in production (HTTPS)
+- SESSION_COOKIE_HTTPONLY — recommended True
+- SESSION_COOKIE_SAMESITE — recommended Strict
+- PERMANENT_SESSION_LIFETIME — seconds for session persistence
+- TOTP_ISSUER — label for TOTP entries in authenticator apps
+- LOG_DIRECTORY / LOG_LEVEL — logging configuration
+- APP_DOMAIN / SSL_MODE — used by setup scripts / nginx rendering
+- WORKERS / THREADS — gunicorn tuning parameters
 
-### Database
+Best practice highlights:
+- Do not commit `.env` or secret files to source control.
+- Use secure file permissions on database and secret files.
+- Serve over HTTPS in production and enable secure cookies.
 
-| Variable          | Description                              | Example                             |
-| ----------------- | ---------------------------------------- | ----------------------------------- |
-| `DATABASE_PATH` | Absolute/relative path to SQLite DB file | `/var/lib/saltvault/saltvault.db` |
-| `DATABASE_NAME` | Optional display/reference name          | `saltvault.db`                    |
+---
 
-### Security & Sessions
+## Operations & Maintenance
 
-| Variable                       | Description                                    | Recommendation            |
-| ------------------------------ | ---------------------------------------------- | ------------------------- |
-| `SECRET_KEY`                 | Overrides persisted instance key (leave unset) | Unset                     |
-| `SESSION_COOKIE_SECURE`      | Cookie only over HTTPS                         | `True` (prod)           |
-| `SESSION_COOKIE_HTTPONLY`    | Prevent JS access                              | `True`                  |
-| `SESSION_COOKIE_SAMESITE`    | CSRF mitigation; `Strict                       | Lax                       |
-| `PERMANENT_SESSION_LIFETIME` | Lifetime in seconds                            | `3600` or policy        |
-| `TOTP_ISSUER`                | Issuer label in authenticator app              | `SaltVault` or org name |
+- Secret key: SaltVault persists a stable secret key in `instance/secret_key`. Deleting it will invalidate sessions and require users to re-setup MFA. Back up this file when you backup the app.
+- Backups: Back up the SQLite database file from `DATABASE_PATH`. Backups contain ciphertext but should be protected as sensitive data.
+- Logs & rotation: Configure log rotation for `LOG_DIRECTORY` so logs do not fill disks.
+- Upgrades: Pull new images or code, and restart containers. Test upgrades in a staging environment first.
 
-### Logging
+---
 
-| Variable          | Description          | Example                                    |
-| ----------------- | -------------------- | ------------------------------------------ |
-| `LOG_DIRECTORY` | Folder for log files | `/var/log/saltvault/`                    |
-| `LOG_LEVEL`     | Logging verbosity    | `INFO` (prod) / `DEBUG` (troubleshoot) |
+## Troubleshooting
 
-### Deployment (Setup Scripts)
+- "Cannot connect to database": Verify `DATABASE_PATH` exists and is writable by the application user.
+- "MFA fails" or "Invalid TOTP": Verify device time is accurate (NTP sync) and that the TOTP issuer/time window matches your authenticator app.
+- Docker compose not found: Use either `docker compose` (plugin) or install legacy `docker-compose` binary.
 
-| Variable       | Description                     | Example               |
-| -------------- | ------------------------------- | --------------------- |
-| `APP_DOMAIN` | Public domain for nginx & certs | `vault.example.com` |
-| `SSL_MODE`   | `cloudflare                     | existing              |
+If you need help diagnosing a problem, open an issue in the repository with reproduction steps, logs, and configuration details (do not paste secrets).
 
-### Gunicorn Tuning
+---
 
-| Variable    | Description               | Example |
-| ----------- | ------------------------- | ------- |
-| `WORKERS` | Gunicorn worker processes | `3`   |
-| `THREADS` | Threads per worker        | `2`   |
+## Security & Privacy Notes
 
-### Feature Flags (Future Placeholders)
+- SaltVault encrypts secrets client-side; the server never stores plaintext values.
+- Master password strength is critical: choose a long, unique password.
+- Treat export files and database backups as highly sensitive and restrict file-system and backup access.
+- If you plan to expose the app to the public internet, use a valid TLS certificate and reputable reverse-proxy (nginx) configuration. Use secure cookies and set `SESSION_COOKIE_SECURE=True`.
 
-| Variable                    | Description                   | Status      |
-| --------------------------- | ----------------------------- | ----------- |
-| `ENABLE_IMPORT_BITWARDEN` | Enable Bitwarden import logic | Placeholder |
-| `ENABLE_IMPORT_NORDPASS`  | Enable NordPass import logic  | Placeholder |
+---
 
-### Best Practices
+## Contributing
 
-1. Do not set `SECRET_KEY` unless you have a rotation procedure; allow auto-managed `instance/secret_key`.
-2. If `SESSION_COOKIE_SAMESITE=None`, you must have `SESSION_COOKIE_SECURE=True` and serve strictly over HTTPS.
-3. Place your database outside the repo path for production; secure permissions (owner read/write only).
-4. Use log rotation (`logrotate`) for `LOG_DIRECTORY` to avoid disk exhaustion.
-5. Scale gunicorn using `(2 * CPU cores) + 1` as a heuristic; tune under load tests.
-6. Keep `.env` out of version control or store secrets in your orchestrator (Docker secrets, Kubernetes, etc.).
+Contributions, bug reports, and pull requests are welcome. Please open issues for bugs or feature requests and read CONTRIBUTING.md (if present) for contribution guidelines.
 
-### Optional: Auto Load `.env`
+---
 
-Install `python-dotenv` and load early in `main.py` if not using Docker exclusively:
+## Other Projects & Portfolio
 
-```python
-from dotenv import load_dotenv
-load_dotenv()
-```
+I maintain other projects and professional work at my portfolio: https://www.cyberpanther-dev.space
 
-### Minimal Production Example
+If you'd like to collaborate, review other work, or contact me for professional services, that site contains background, featured projects, and contact details.
 
-```dotenv
-FLASK_ENV=production
-DEBUG=False
-HOST=0.0.0.0
-PORT=8080
-DATABASE_PATH=/var/lib/saltvault/saltvault.db
-SESSION_COOKIE_SECURE=True
-SESSION_COOKIE_HTTPONLY=True
-SESSION_COOKIE_SAMESITE=Strict
-PERMANENT_SESSION_LIFETIME=3600
-TOTP_ISSUER=MyCompanyVault
-LOG_LEVEL=INFO
-APP_DOMAIN=vault.example.com
-SSL_MODE=existing
-WORKERS=3
-THREADS=2
-```
+---
 
-## Notes & Tips
+## License
 
-* Persistent Secret Key: The application now writes a stable secret key to `instance/secret_key`. Deleting it will invalidate sessions and require MFA re-setup.
-* Docker Compose Detection: If the setup script reports compose is missing, install either the Docker Compose plugin or legacy binary before re-running.
-* Self-Signed Certificates: These are suitable only for testing or internal lab use. Browsers will show a warning unless you trust the root.
-* Security Hardening (Production): Consider enabling secure cookies (`SESSION_COOKIE_SECURE`, `SESSION_COOKIE_HTTPONLY`, `SESSION_COOKIE_SAMESITE='Strict'`) via environment variables.
-
-# Version Control
-
-Beta - 1.0.0 - Beta version with the basic functions listed above - 29-Nov-2025
-
-Beta - 1.1.0 - Added improved import/export functionality, notifications, settings, and improved functionality on action buttons. - 30-Nov-2025
-
-Beta - 1.1.1 - Updated UI to make navbar easier to use and updated the dialog boxes on the index.html 30-Nov-2025
-
-Beta - 1.1.2 - Added Tailscale configuration option on the setup_saltvault.py script to allow for Tailscale use and Tailscale Let's Encrypt certificates = 30-Nov-2025
+TBD
