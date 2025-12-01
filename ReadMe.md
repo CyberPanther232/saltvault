@@ -70,18 +70,6 @@ A secure, lightweight, and containerized private password manager built with Fla
    python scripts/setup_saltvault.py
    ```
 
-   Bash (Linux/macOS):
-
-   ```bash
-   bash scripts/setup_saltvault.sh
-   ```
-
-   PowerShell (Windows):
-
-   ```powershell
-   pwsh .\scripts\setup_saltvault.ps1
-   ```
-
    After the script completes, it will run (or instruct you to run) Docker Compose. Access the site via `https://<your-domain>` (or the chosen host). On first visit you will be guided through master account + MFA setup.
 5. **Run the application (Manual path):**
 
