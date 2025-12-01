@@ -14,6 +14,7 @@ import urllib.request
 import json as pyjson
 import smtplib
 from email.message import EmailMessage
+from pathlib import Path
 
 # Internal imports
 from .init_db import get_db
@@ -90,8 +91,8 @@ def notify_service(event: str, detail: str):
         try:
             data = pyjson.dumps({"content": f"[SaltVault] {event}: {detail}"}).encode('utf-8')
             req = urllib.request.Request(webhook, data=data, headers={'Content-Type': 'application/json'})
-            urllib.request.urlopen(req, timeout=5)
-        except Exception:
+        except Exception as e:
+            log_event('DISCORD_NOTIFICATION_FAILED', f'Failed to send Discord notification for event {event}. Error: {e}', severity='ERROR')
             pass
     if email_enabled:
         try:
@@ -952,7 +953,8 @@ def _send_discord_test(webhook: str, message: str):
         req = urllib.request.Request(webhook, data=data, headers={'Content-Type': 'application/json'})
         urllib.request.urlopen(req, timeout=5)
         return True
-    except Exception:
+    except Exception as e:
+        log_event('DISCORD_TEST_FAILED', f'Failed to send Discord test message. Error: {e}', severity='ERROR')
         return False
 
 @main.route('/settings/update-discord', methods=['POST'])
