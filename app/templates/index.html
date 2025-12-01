@@ -18,10 +18,10 @@
 
         <form class="search-form mb-3" method="GET" action="{{ url_for('main.index_route') }}">
             <div class="input-group">
-                <input type="text" id="search" name="q" value="{{ q }}" class="form-control" placeholder="Search passwords...">
+                <input type="text" id="search" name="q" value="{{ q }}" class="form-control" placeholder="Search passwords..." style="color: white;">
                 
                 <div class="input-group-append">
-                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#fieldSelector" aria-expanded="false" aria-controls="fieldSelector">
+                    <button type="button" class="btn btn-outline-secondary dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#fieldSelector" aria-expanded="false" aria-controls="fieldSelector" style="margin-left: 5px;">
                         Fields
                     </button>
                     <button type="submit" class="btn btn-primary">Search</button>
@@ -30,7 +30,7 @@
             <div id="fieldSelector" class="collapse mt-2">
                 <div class="card card-body bg-dark border-secondary">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <strong class="small text-muted">Filter Fields</strong>
+                        <strong class="small" style="color: white;">Filter Fields</strong>
                         <button type="button" class="btn btn-xs btn-link p-0 select-all-fields">Select All</button>
                     </div>
                     {% set active = fields.split(',') if fields else [] %}

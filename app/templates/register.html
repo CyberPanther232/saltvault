@@ -5,7 +5,7 @@
 {% block content %}
 <div class="login-wrapper">
     <h1 class="app-title">SaltVault</h1>
-    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="SaltVault Logo" class="login-logo-img">
+    <img src="{{ url_for('static', filename='images/salt_vault_icon.png') }}" alt="SaltVault Logo" class="login-logo-img">
     <div class="auth-container">
         <h2>Register New User</h2>
         <form method="POST" action="{{ url_for('main.register') }}">
@@ -21,7 +21,7 @@
                 <label for="email">Email</label>
                 <input type="email" class="form-control" id="email" name="email" required>
             </div>
-            <button type="submit" class="btn btn-primary">Register</button>
+            <button type="submit" class="btn btn-primary" >Register</button>
             <a href="{{ url_for('main.login') }}" class="btn btn-secondary">Back to Login</a>
         </form>
     </div>

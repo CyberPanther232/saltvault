@@ -194,6 +194,11 @@ h2 {
     box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
 }
 
+.form-control::placeholder {
+    color: white;
+    opacity: 1;
+}
+
 .alert {
     border: 1px solid var(--border-color);
     background-color: var(--surface-color);
