@@ -14,8 +14,6 @@ SaltVault is a secure, lightweight, and containerized private password manager b
 - Secure Storage: Encrypted entries are stored in an SQLite database (configurable path).
 - Simple, self-hostable architecture: Docker Compose or local Python execution supported.
 
-(Deprecated or removed features such as a dedicated dark theme, built-in password generator, password strength meter, and named importers for specific third-party tools have been removed from this README because they are not present in the current codebase.)
-
 ---
 
 ## Quick Start
