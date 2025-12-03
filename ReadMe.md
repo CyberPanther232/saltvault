@@ -2,10 +2,9 @@
 
 ![SaltVault Logo](./salt_vault_repo_logo.png)
 
-**Version:** Beta - 1.1.2
+**Version:** Beta - 1.2.0
 
 SaltVault is a secure, lightweight, and containerized private password manager built with Flask. It focuses on minimal trusted surface area: secret material (passwords) is encrypted in the browser using a key derived from your master password and is stored encrypted on the server. SaltVault also supports TOTP-based two-factor authentication to protect account access.
-
 
 ## Core Features
 
@@ -13,6 +12,7 @@ SaltVault is a secure, lightweight, and containerized private password manager b
 - Two-Factor Authentication (2FA): TOTP-based 2FA compatible with standard authenticator apps.
 - Secure Storage: Encrypted entries are stored in an SQLite database (configurable path).
 - Simple, self-hostable architecture: Docker Compose or local Python execution supported.
+- Notifications: Setup a SMTP server to send emails or a Discord Webhook for event notifications
 
 ---
 
@@ -21,24 +21,28 @@ SaltVault is a secure, lightweight, and containerized private password manager b
 Choose one of the following deployment options.
 
 A. Production (recommended): Docker Compose
+
 1. Clone the repository
+
    ```bash
    git clone https://github.com/CyberPanther232/saltvault
    cd saltvault
    ```
 2. Copy the environment template and edit:
+
    ```bash
    cp app/app.env.example app/app.env
    # or if app/app.env.example is at the repo root:
    # cp app.env.example app.env
    ```
+
    - Set `DATABASE_PATH` to a persistent path outside your repo for production (e.g., `/var/lib/saltvault/saltvault.db`).
    - Set `APP_DOMAIN` and `SSL_MODE` as needed for HTTPS.
-
 3. Place certificates (production):
-   - Put `fullchain.pem` and `privkey.pem` into `nginx/certs/` if you use `SSL_MODE=existing` or Cloudflare origin certs. The setup script or your deploy process can handle this per your environment.
 
+   - Put `fullchain.pem` and `privkey.pem` into `nginx/certs/` if you use `SSL_MODE=existing` or Cloudflare origin certs. The setup script or your deploy process can handle this per your environment.
 4. Start containers:
+
    ```bash
    # If using legacy docker-compose
    docker-compose up -d
@@ -47,6 +51,7 @@ A. Production (recommended): Docker Compose
    ```
 
 B. Local development (no Docker)
+
 1. Create and activate a virtual environment:
    ```bash
    python -m venv .env
@@ -62,6 +67,7 @@ B. Local development (no Docker)
    flask init-db
    python main.py
    ```
+
    The app will run on the configured host/port (default 0.0.0.0:8080 for the dev server).
 
 C. Automated setup script
@@ -76,24 +82,25 @@ python scripts/setup_saltvault.py
 ## First-time Use & Typical Workflow
 
 1. First visit
+
    - Open your browser to the app domain (e.g., https://vault.example.com) or http://localhost:8080 for local dev.
    - You will be guided to create a master account. Choose a strong master password — this is used to derive encryption keys in the browser.
-
 2. Enable two-factor authentication (TOTP)
-   - During or immediately after account creation you will be prompted to set up TOTP 2FA. Scan the QR code with your authenticator app and save recovery codes if provided.
 
+   - During or immediately after account creation you will be prompted to set up TOTP 2FA. Scan the QR code with your authenticator app and save recovery codes if provided.
 3. Add a password entry
+
    - From the dashboard, choose "Add Password" (or similar).
    - Enter the name, username, URL, and any notes. The plaintext password field is encrypted client-side before being sent to the server.
-
 4. View an entry
-   - Click the view/decrypt action for a given row. The decryption happens locally in your browser session after verifying your master password (or session-derived key).
 
+   - Click the view/decrypt action for a given row. The decryption happens locally in your browser session after verifying your master password (or session-derived key).
 5. Edit or delete
+
    - Edit: Modify the entry fields in the UI; on save the updated plaintext is encrypted client-side and replaced on the server.
    - Delete: Permanently removes the entry from the database.
-
 6. Export / Import (if enabled)
+
    - Export: If the installation supports export, the application will require re-authentication (master password and TOTP) prior to exporting your data. Exported files may be plaintext CSV or JSON formatted depending on the chosen export mode — treat exported data as highly sensitive.
    - Import: Import functionality accepts generic CSV or JSON import files when available. Validate imported data carefully before trusting or deleting originals.
 
@@ -122,6 +129,7 @@ Some key variables:
 - WORKERS / THREADS — gunicorn tuning parameters
 
 Best practice highlights:
+
 - Do not commit `.env` or secret files to source control.
 - Use secure file permissions on database and secret files.
 - Serve over HTTPS in production and enable secure cookies.

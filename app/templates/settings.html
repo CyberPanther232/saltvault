@@ -46,6 +46,8 @@
 	<p>Configure environment variables for Discord or Email notifications:</p>
 	<ul>
 		<li><code>DISCORD_WEBHOOK_URL</code> – Discord channel webhook for security events.</li>
+		<li><code>ENABLE_DISCORD_NOTIFICATIONS=True</code> - Enable or disable Discord notifications globally.</li>
+		<li><code>DISCORD_ALERT_LOGIN</code>, <code>DISCORD_ALERT_IMP_EXP</code>, <code>DISCORD_ALERT_DELETE</code>, <code>DISCORD_ALERT_SECURITY</code> - Enable or disable specific Discord notification categories.</li>
 		<li><code>EMAIL_ENABLED=True</code>, <code>SMTP_SERVER</code>, <code>SMTP_PORT</code>, <code>SMTP_USER</code>, <code>SMTP_PASSWORD</code>, <code>EMAIL_FROM</code>, <code>EMAIL_TO</code></li>
 	</ul>
 	<p>Edit <code>app/app.env</code> or your deployment environment and restart the application to apply changes.</p>
