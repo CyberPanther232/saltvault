@@ -202,7 +202,6 @@ def bulk_delete_passwords():
         db.commit()
         flash(f'Deleted {len(clean_ids)} password(s).', 'success')
         log_event('BULK_DELETE_SUCCESS', f'User {current_user.username} deleted {len(clean_ids)} passwords', severity='INFO')
-        notify_service('PASSWORD_DELETED', f'User {current_user.username} deleted {len(clean_ids)} password(s).')
     except Exception as e:
         log_event('BULK_DELETE_ERROR', f'Bulk delete error for user {current_user.username}: {e}', severity='ERROR')
         flash(f'Error deleting selected passwords: {e}', 'danger')
@@ -632,7 +631,6 @@ def delete_password(password_id):
         db.commit()
         log_event('PASSWORD_DELETED', f'User {current_user.username} deleted password ID {password_id}', severity='INFO')
         flash('Password deleted successfully.', 'success')
-        notify_service('PASSWORD_DELETED', f'User {current_user.username} deleted password ID {password_id}.')
         return redirect(url_for('main.index_route'))
     except Exception as e:
         log_event('PASSWORD_DELETE_ERROR', f'Error deleting password ID {password_id} for user {current_user.username}: {e}', severity='ERROR')
