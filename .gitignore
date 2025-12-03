@@ -22,3 +22,9 @@ app.env
 *~
 *#
 .DS_Store
+
+# Chrome Extension files
+*.crx
+
+# PEM files
+*.pem

@@ -24,7 +24,10 @@ from .logging_functions import get_logger, log_event
 from .password_generator import generate_password, strengthen_password, check_password_strength
 from .quotes import quotes
 from .process_import import *
+
+# Main and API blueprints
 main = Blueprint('main', __name__)
+api = Blueprint('api', __name__, url_prefix='/api')
 
 login_manager = LoginManager()
 
@@ -531,6 +534,31 @@ def view_password(password_id):
     log_event('PASSWORD_NOT_FOUND', f'Password ID {password_id} not found for user {current_user.username}', severity='WARNING')
     return jsonify({'error': 'Password not found'}), 404
 
+@api.route('/passwords/list', methods=['GET'])
+@login_required
+def api_list_passwords():
+    if request.method != 'GET':
+        log_event('METHOD_NOT_ALLOWED', 'Attempted to access /api/passwords/list with non-GET method', severity='WARNING')
+        return "Method not allowed 405", 405
+    key = get_key()
+    if not key:
+        log_event('MISSING_KEY', 'Encryption key missing in session during API list-passwords', severity='ERROR')
+        return jsonify({'error': 'Session expired'}), 401
+    db = get_db()
+    rows = db.execute('SELECT id, title, username, email FROM passwords WHERE user_id = ?', (current_user.id,)).fetchall()
+    items = []
+    for r in rows:
+        try:
+            items.append({
+                'id': r['id'],
+                'title': decrypt_data(key, r['title']),
+                'username': decrypt_data(key, r['username']),
+                'url': decrypt_data(key, r['email'])
+            })
+        except Exception:
+            continue
+    return jsonify({'items': items}), 200
+
 @main.route('/edit-password/<int:password_id>', methods=['GET', 'POST'])
 @login_required
 def edit_password(password_id):
@@ -1021,3 +1049,140 @@ def update_notification_prefs():
     db.commit()
     flash('Notification preferences updated.', 'success')
     return redirect(url_for('main.settings'))
+
+
+@api.route('/health', methods=['GET'])
+@login_required
+def health_check():
+    if request.method != 'GET':
+        log_event('METHOD_NOT_ALLOWED', 'Attempted to access /health with non-GET method', severity='WARNING')
+        return "Method not allowed 405", 405
+    return jsonify({'status': 'ok'}), 200
+
+@api.route('/version', methods=['GET'])
+def version_check():
+    if request.method != 'GET':
+        log_event('METHOD_NOT_ALLOWED', 'Attempted to access /api/version with non-GET method', severity='WARNING')
+        return "Method not allowed 405", 405
+    return jsonify({'version': '1.1.1'}), 200
+
+@api.route('/login', methods=['POST'])
+def api_login():
+    if request.method != 'POST':
+        log_event('METHOD_NOT_ALLOWED', 'Attempted to access /api/login with non-POST method', severity='WARNING')
+        return "Method not allowed 405", 405
+    data = request.get_json(force=True) or {}
+    username = data.get('username', '')
+    password = data.get('password', '')
+    totp_code = data.get('totp', '')
+    backup_code = data.get('backup_code', '')
+
+    db = get_db()
+    user_data = db.execute('SELECT * FROM users WHERE username = ?', (username,)).fetchone()
+    if not user_data:
+        log_event('API_LOGIN_FAILED', f'API login failed for username {username}: user not found', severity='WARNING')
+        return jsonify({'error': 'Invalid credentials'}), 401
+
+    if not check_password_hash(user_data['password_hash'], password):
+        log_event('API_LOGIN_FAILED', f'API login failed for username {username}: incorrect password', severity='WARNING')
+        return jsonify({'error': 'Invalid credentials'}), 401
+
+    totp_valid = False
+    if totp_code and pyotp.TOTP(user_data['mfa_secret']).verify(totp_code):
+        totp_valid = True
+    elif backup_code:
+        rows = db.execute('SELECT id, code_hash FROM mfa_backup_codes WHERE user_id = ? AND used = 0', (user_data['id'],)).fetchall()
+        for r in rows:
+            if check_password_hash(r['code_hash'], backup_code.strip()):
+                db.execute('UPDATE mfa_backup_codes SET used = 1 WHERE id = ?', (r['id'],))
+                db.commit()
+                totp_valid = True
+                notify_service('API_BACKUP_CODE_USED', f'User {username} used a backup code for API login.')
+                break
+    if not totp_valid:
+        log_event('API_LOGIN_FAILED_MFA', f'API login failed for username {username}: MFA verification failed', severity='WARNING')
+        return jsonify({'error': 'MFA verification failed'}), 401
+
+    user = User(id=user_data['id'], username=user_data['username'], password_hash=user_data['password_hash'], mfa_secret=user_data['mfa_secret'], salt=user_data['encryption_salt'])
+    login_user(user)
+    # Derive encryption key from provided password and user's salt, store in session
+    try:
+        salt = bytes.fromhex(user.salt)
+        key = derive_key(password, salt)
+        session['key'] = key.hex()
+        # Clear any transient login helpers
+        session.pop('username_for_login', None)
+        session.pop('tmp_password', None)
+        notify_service('USER_LOGIN_SUCCESSFUL', f'API login successful for user {username}.')
+        log_event('API_LOGIN_SUCCESS', f'User {username} logged in via API', severity='INFO')
+        return jsonify({ 'status': 'ok' }), 200
+    except Exception as e:
+        log_event('API_LOGIN_KEY_DERIVE_ERROR', f'Failed to derive key for user {username}: {e}', severity='ERROR')
+        return jsonify({'error': 'Internal error'}), 500
+    
+@api.route('/add-password', methods=['POST'])
+@login_required
+def api_add_password():
+    if request.method != 'POST':
+        log_event('METHOD_NOT_ALLOWED', 'Attempted to access /api/add-password with non-POST method', severity='WARNING')
+        return "Method not allowed 405", 405
+    
+    key = get_key()
+    if not key:
+        log_event('MISSING_KEY', 'Encryption key missing in session during API add-password', severity='ERROR')
+        return jsonify({'error': 'Session expired'}), 401
+    
+    try:
+        encrypted_title = encrypt_data(key, request.json['title']).hex()
+        encrypted_username = encrypt_data(key, request.json['username']).hex()
+        encrypted_password = encrypt_data(key, request.json['password']).hex()
+        encrypted_email = encrypt_data(key, request.json['email']).hex()
+        encrypted_notes = encrypt_data(key, request.json['notes']).hex() if request.json.get('notes') else None
+        
+        db = get_db()
+        db.execute('INSERT INTO passwords (user_id, title, username, password, email, notes) VALUES (?, ?, ?, ?, ?, ?)',
+                   (current_user.id, encrypted_title, encrypted_username, encrypted_password, encrypted_email, encrypted_notes))
+        db.commit()
+        log_event('API_PASSWORD_ADDED', f'User {current_user.username} added a new password entry via API titled {request.json["title"]}', severity='INFO')
+        return jsonify({'status': 'Password added successfully.'}), 201
+    except Exception as e:
+        log_event('API_PASSWORD_ADD_ERROR', f'Error adding password via API for user {current_user.username}: {e}', severity='ERROR')
+        return jsonify({'error': f'Error adding password: {e}'}), 500
+    
+@api.route('/view-password/<int:password_id>', methods=['GET'])
+@login_required
+def api_view_password(password_id):
+    if request.method != 'GET':
+        log_event('METHOD_NOT_ALLOWED', 'Attempted to access /api/view-password with non-GET method', severity='WARNING')
+        return "Method not allowed 405", 405
+
+    key = get_key()
+    if not key:
+        log_event('MISSING_KEY', 'Encryption key missing in session during API view-password', severity='ERROR')
+        return jsonify({'error': 'Session expired'}), 401
+
+    db = get_db()
+    p_data = db.execute('SELECT * FROM passwords WHERE id = ? AND user_id = ?', (password_id, current_user.id)).fetchone()
+
+    if p_data:
+        try:
+            decrypted_title = decrypt_data(key, p_data['title'])
+            decrypted_username = decrypt_data(key, p_data['username'])
+            decrypted_password = decrypt_data(key, p_data['password'])
+            decrypted_email = decrypt_data(key, p_data['email'])
+            decrypted_notes = decrypt_data(key, p_data['notes']) if p_data['notes'] else ''
+            log_event('API_PASSWORD_VIEWED', f'User {current_user.username} viewed password ID {password_id} via API', severity='INFO')
+            return jsonify({
+                'id': p_data['id'],
+                'title': decrypted_title,
+                'username': decrypted_username,
+                'password': decrypted_password,
+                'email': decrypted_email,
+                'notes': decrypted_notes
+            }), 200
+        except Exception:
+            log_event('API_DECRYPTION_FAILED', f'Failed to decrypt password ID {password_id} for user {current_user.username}', severity='ERROR')
+            return jsonify({'error': 'Decryption failed'}), 500
+
+    log_event('API_PASSWORD_NOT_FOUND', f'Password ID {password_id} not found for user {current_user.username}', severity='WARNING')
+    return jsonify({'error': 'Password not found'}), 404
