@@ -41,6 +41,46 @@ def get_key():
     log_event('KEY_RETRIEVED_FROM_SESSION', f'Encryption key retrieved from session for user ID {current_user.id}', severity='INFO')
     return bytes.fromhex(session['key'])
 
+def _get_discord_settings(user_id: int):
+    """Resolve Discord notification settings with environment-first, file fallback.
+    Returns dict: {enabled: bool, webhook_url: str or '', categories: {login, import_export, deletion, security}}
+    """
+    env_enabled = (os.environ.get('ENABLE_DISCORD_NOTIFICATIONS', 'False').lower() == 'true')
+    env_webhook = os.environ.get('DISCORD_WEBHOOK_URL', '')
+    categories = {
+        'login': os.environ.get('DISCORD_ALERT_LOGIN', '').lower() in ('1','true','yes'),
+        'import_export': os.environ.get('DISCORD_ALERT_IMP_EXP', '').lower() in ('1','true','yes'),
+        'deletion': os.environ.get('DISCORD_ALERT_DELETE', '').lower() in ('1','true','yes'),
+        'security': os.environ.get('DISCORD_ALERT_SECURITY', '').lower() in ('1','true','yes'),
+    }
+    # If env has a webhook and enabled is true, prefer env settings
+    if env_webhook and env_enabled:
+        return {
+            'enabled': True,
+            'webhook_url': env_webhook,
+            'categories': categories
+        }
+    # Fallback to per-user JSON settings (data/<user>_discord_settings.json)
+    settings_file = Path(f'./app/data/{user_id}_discord_settings.json')
+    if settings_file.exists():
+        try:
+            with settings_file.open('r') as f:
+                data = pyjson.load(f)
+            enabled = str(data.get('status', 'disabled')).lower() in ('enabled','true','1')
+            webhook = data.get('webhook_url', '')
+            cats = data.get('notifications_categories', {})
+            merged_cats = {
+                'login': bool(cats.get('login', True)),
+                'import_export': bool(cats.get('import_export', True)),
+                'deletion': bool(cats.get('deletion', True)),
+                'security': bool(cats.get('security', True)),
+            }
+            return {'enabled': enabled, 'webhook_url': webhook, 'categories': merged_cats}
+        except Exception:
+            pass
+    # Default disabled
+    return {'enabled': False, 'webhook_url': '', 'categories': {'login': False, 'import_export': False, 'deletion': False, 'security': False}}
+
 def notify_service(event: str, detail: str):
     """Send notification respecting per-category user preferences.
     Categories: login, import_export, deletion, security.
@@ -50,6 +90,7 @@ def notify_service(event: str, detail: str):
     category_map = {
         'USER_LOGIN_SUCCESSFUL': 'login',
         'VALID_CREDENTIALS_ENTERED': 'login',
+        'USER_LOGOUT': 'login',
         'LOGIN_BACKUP_CODE': 'login',
         'USER_REGISTERED': 'security',
         'PASSWORD_CHANGED': 'security',
@@ -87,7 +128,9 @@ def notify_service(event: str, detail: str):
         pref = db.execute('SELECT * FROM notification_preferences WHERE user_id = ?', (user_id,)).fetchone()
     discord_allowed = pref[f'discord_{category}'] == 1 if f'discord_{category}' in pref.keys() else False
     email_allowed = pref[f'email_{category}'] == 1 if f'email_{category}' in pref.keys() else False
-    webhook = os.environ.get('DISCORD_WEBHOOK_URL') if discord_allowed else None
+    # Resolve Discord settings (env takes precedence, else per-user file)
+    ds = _get_discord_settings(user_id)
+    webhook = ds['webhook_url'] if (ds['enabled'] and ds['categories'].get(category, False) and discord_allowed) else None
     email_enabled_global = os.environ.get('EMAIL_ENABLED', 'False').lower() == 'true'
     email_enabled = email_allowed and email_enabled_global
     if webhook:
@@ -117,6 +160,32 @@ def notify_service(event: str, detail: str):
                     s.send_message(msg)
         except Exception:
             pass
+
+def _save_discord_settings(user_id: int, webhook: str, notification_categories: dict, discord_enabled: bool):
+    """Persist Discord settings to per-user JSON file under app/data regardless of env."""
+    settings_file = Path(f'./app/data/{user_id}_discord_settings.json')
+    
+    if settings_file.exists():
+        with settings_file.open('r') as f:
+            settings = pyjson.load(f)
+        settings['status'] = 'enabled' if discord_enabled else 'disabled'
+        if webhook:
+            settings['webhook_url'] = webhook
+        settings['notifications_categories'] = notification_categories
+        with settings_file.open('w') as f:
+            pyjson.dump(settings, f)
+    else:
+        settings = {"user_id": f'{user_id}', "status" : 'enabled' if discord_enabled else 'disabled', "webhook_url": webhook or "", "notifications_categories": notification_categories or {
+            "login": True,
+            "import_export": True,
+            "deletion": True,
+            "security": True
+        }}
+        settings_file.parent.mkdir(parents=True, exist_ok=True)
+        with settings_file.open('w') as f:
+            pyjson.dump(settings, f)
+    
+    
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -202,6 +271,7 @@ def bulk_delete_passwords():
         db.commit()
         flash(f'Deleted {len(clean_ids)} password(s).', 'success')
         log_event('BULK_DELETE_SUCCESS', f'User {current_user.username} deleted {len(clean_ids)} passwords', severity='INFO')
+        notify_service('PASSWORD_DELETED', f'User {current_user.username} deleted {len(clean_ids)} password(s).')
     except Exception as e:
         log_event('BULK_DELETE_ERROR', f'Bulk delete error for user {current_user.username}: {e}', severity='ERROR')
         flash(f'Error deleting selected passwords: {e}', 'danger')
@@ -406,6 +476,7 @@ def login_mfa():
             session.pop('username_for_login', None)
             session.pop('tmp_password', None)
             log_event('USER_LOGIN_SUCCESSFUL', f'User {username} logged in successfully with MFA', severity='INFO')
+            notify_service('USER_LOGIN_SUCCESSFUL', f'User {username} logged in successfully with MFA.')
             
             return redirect(url_for('main.index_route'))
         else:
@@ -471,6 +542,7 @@ def logout():
     session.clear()
     flash('You have been logged out.', 'success')
     log_event('USER_LOGOUT', f'User {username} logged out', severity='INFO')
+    notify_service('USER_LOGOUT', f'User {username} logged out.')
     return redirect(url_for('main.login'))
 
 @main.route('/add-password', methods=['GET', 'POST'])
@@ -631,6 +703,7 @@ def delete_password(password_id):
         db.commit()
         log_event('PASSWORD_DELETED', f'User {current_user.username} deleted password ID {password_id}', severity='INFO')
         flash('Password deleted successfully.', 'success')
+        notify_service('PASSWORD_DELETED', f'User {current_user.username} deleted password ID {password_id}.')
         return redirect(url_for('main.index_route'))
     except Exception as e:
         log_event('PASSWORD_DELETE_ERROR', f'Error deleting password ID {password_id} for user {current_user.username}: {e}', severity='ERROR')
@@ -1031,7 +1104,14 @@ def update_discord():
         flash('Invalid Discord webhook URL.', 'danger')
         return redirect(url_for('main.settings'))
     os.environ['DISCORD_WEBHOOK_URL'] = webhook
+    os.environ['ENABLE_DISCORD_NOTIFICATIONS'] = 'True'
     saved = _update_env_variable('DISCORD_WEBHOOK_URL', webhook)
+    _save_discord_settings(current_user.id, webhook, {
+        'login': True,
+        'import_export': True,
+        'deletion': True,
+        'security': True,
+    }, True)
     ok, reason = _send_discord_test(webhook, f"Discord webhook configured for user {current_user.username}.")
     if ok:
         flash('Discord webhook saved and test message sent.', 'success')
@@ -1045,7 +1125,8 @@ def update_discord():
 @main.route('/settings/test-discord', methods=['POST'])
 @login_required
 def test_discord():
-    webhook = os.environ.get('DISCORD_WEBHOOK_URL')
+    ds = _get_discord_settings(current_user.id)
+    webhook = os.environ.get('DISCORD_WEBHOOK_URL') or ds.get('webhook_url')
     if not webhook:
         flash('No Discord webhook configured.', 'warning')
         return redirect(url_for('main.settings'))
@@ -1083,6 +1164,14 @@ def update_notification_prefs():
             current_user.id, cols['discord_login'], cols['discord_import_export'], cols['discord_deletion'], cols['discord_security'], cols['email_login'], cols['email_import_export'], cols['email_deletion'], cols['email_security']
         ))
     db.commit()
+    # Persist Discord settings if env not set
+    ds = _get_discord_settings(current_user.id)
+    _save_discord_settings(current_user.id, ds.get('webhook_url'), {
+        'login': bool(cols['discord_login']),
+        'import_export': bool(cols['discord_import_export']),
+        'deletion': bool(cols['discord_deletion']),
+        'security': bool(cols['discord_security']),
+    }, ds.get('enabled', False))
     flash('Notification preferences updated.', 'success')
     return redirect(url_for('main.settings'))
 
