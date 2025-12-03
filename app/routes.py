@@ -92,8 +92,8 @@ def notify_service(event: str, detail: str):
     email_enabled = email_allowed and email_enabled_global
     if webhook:
         try:
-            data = pyjson.dumps({"content": f"[SaltVault] {event}: {detail}"}).encode('utf-8')
-            req = urllib.request.Request(webhook, data=data, headers={'Content-Type': 'application/json'})
+            message = f"[SaltVault] {event}: {detail}"
+            _send_discord_notification(webhook, message)
         except Exception as e:
             log_event('DISCORD_NOTIFICATION_FAILED', f'Failed to send Discord notification for event {event}. Error: {e}', severity='ERROR')
             pass
@@ -202,6 +202,7 @@ def bulk_delete_passwords():
         db.commit()
         flash(f'Deleted {len(clean_ids)} password(s).', 'success')
         log_event('BULK_DELETE_SUCCESS', f'User {current_user.username} deleted {len(clean_ids)} passwords', severity='INFO')
+        notify_service('PASSWORD_DELETED', f'User {current_user.username} deleted {len(clean_ids)} password(s).')
     except Exception as e:
         log_event('BULK_DELETE_ERROR', f'Bulk delete error for user {current_user.username}: {e}', severity='ERROR')
         flash(f'Error deleting selected passwords: {e}', 'danger')
@@ -631,6 +632,7 @@ def delete_password(password_id):
         db.commit()
         log_event('PASSWORD_DELETED', f'User {current_user.username} deleted password ID {password_id}', severity='INFO')
         flash('Password deleted successfully.', 'success')
+        notify_service('PASSWORD_DELETED', f'User {current_user.username} deleted password ID {password_id}.')
         return redirect(url_for('main.index_route'))
     except Exception as e:
         log_event('PASSWORD_DELETE_ERROR', f'Error deleting password ID {password_id} for user {current_user.username}: {e}', severity='ERROR')
@@ -978,11 +980,45 @@ def _update_env_variable(var: str, value: str):
 def _send_discord_test(webhook: str, message: str):
     try:
         data = pyjson.dumps({"content": message}).encode('utf-8')
-        req = urllib.request.Request(webhook, data=data, headers={'Content-Type': 'application/json'})
-        urllib.request.urlopen(req, timeout=5)
-        return True
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': 'SaltVault/1.0 (+https://github.com/CyberPanther232/saltvault)'
+        }
+        req = urllib.request.Request(webhook, data=data, headers=headers)
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            status = getattr(resp, 'status', None) or resp.getcode()
+            body = resp.read().decode('utf-8', errors='replace')
+            if 200 <= status < 300:
+                return True, ''
+            else:
+                reason = f'HTTP {status}: {body[:200]}'
+                log_event('DISCORD_TEST_FAILED', f'Non-2xx response from Discord webhook. {reason}', severity='ERROR')
+                return False, reason
     except Exception as e:
-        log_event('DISCORD_TEST_FAILED', f'Failed to send Discord test message. Error: {e}', severity='ERROR')
+        reason = f'{type(e).__name__}: {e}'
+        log_event('DISCORD_TEST_FAILED', f'Exception sending Discord test: {reason}', severity='ERROR')
+        return False, reason
+
+def _send_discord_notification(webhook: str, message: str):
+    try:
+        data = pyjson.dumps({"content": message}).encode('utf-8')
+        headers = {
+            'Content-Type': 'application/json',
+            'User-Agent': 'SaltVault/1.0 (+https://github.com/CyberPanther232/saltvault)'
+        }
+        req = urllib.request.Request(webhook, data=data, headers=headers)
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            status = getattr(resp, 'status', None) or resp.getcode()
+            body = resp.read().decode('utf-8', errors='replace')
+            if 200 <= status < 300:
+                return True
+            else:
+                reason = f'HTTP {status}: {body[:200]}'
+                log_event('DISCORD_NOTIFICATION_FAILED', f'Non-2xx response from Discord webhook. {reason}', severity='ERROR')
+                return False
+    except Exception as e:
+        reason = f'{type(e).__name__}: {e}'
+        log_event('DISCORD_NOTIFICATION_FAILED', f'Exception sending Discord notification: {reason}', severity='ERROR')
         return False
 
 @main.route('/settings/update-discord', methods=['POST'])
@@ -998,11 +1034,12 @@ def update_discord():
         return redirect(url_for('main.settings'))
     os.environ['DISCORD_WEBHOOK_URL'] = webhook
     saved = _update_env_variable('DISCORD_WEBHOOK_URL', webhook)
-    if _send_discord_test(webhook, f"Discord webhook configured for user {current_user.username}."):
+    ok, reason = _send_discord_test(webhook, f"Discord webhook configured for user {current_user.username}.")
+    if ok:
         flash('Discord webhook saved and test message sent.', 'success')
         notify_service('DISCORD_CONFIGURED', f'User {current_user.username} configured Discord webhook.')
     else:
-        flash('Webhook saved but test message failed.', 'warning')
+        flash('Webhook saved but test message failed. ' + (f'Reason: {reason}' if reason else ''), 'warning')
     if not saved:
         flash('Environment file not found; webhook active only for current process.', 'warning')
     return redirect(url_for('main.settings'))
@@ -1014,10 +1051,11 @@ def test_discord():
     if not webhook:
         flash('No Discord webhook configured.', 'warning')
         return redirect(url_for('main.settings'))
-    if _send_discord_test(webhook, f"Test notification from user {current_user.username}."):
+    ok, reason = _send_discord_test(webhook, f"Test notification from user {current_user.username}.")
+    if ok:
         flash('Test notification sent.', 'success')
     else:
-        flash('Failed to send test notification.', 'danger')
+        flash('Failed to send test notification. ' + (f'Reason: {reason}' if reason else ''), 'danger')
     return redirect(url_for('main.settings'))
 
 @main.route('/settings/update-notification-prefs', methods=['POST'])
@@ -1148,7 +1186,7 @@ def api_add_password():
     except Exception as e:
         log_event('API_PASSWORD_ADD_ERROR', f'Error adding password via API for user {current_user.username}: {e}', severity='ERROR')
         return jsonify({'error': f'Error adding password: {e}'}), 500
-    
+
 @api.route('/view-password/<int:password_id>', methods=['GET'])
 @login_required
 def api_view_password(password_id):
