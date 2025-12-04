@@ -35,7 +35,7 @@
                     </div>
                     {% set active = fields.split(',') if fields else [] %}
                     <div class="row">
-                        {% for f in ['title','username','email','notes'] %}
+                        {% for f in ['title','username','email','url','notes'] %}
                         <div class="col-6 mb-1">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" value="{{ f }}" id="field-{{ f }}" {% if f in active %}checked{% endif %}>
@@ -63,6 +63,7 @@
                             <th>Title</th>
                             <th>Username</th>
                             <th>Email</th>
+                            <th>URL</th>
                             <th>Password</th>
                             <th>Actions</th>
                         </tr>
@@ -74,6 +75,7 @@
                             <td class="truncate" title="{{ password.title }}">{{ password.title }}</td>
                             <td class="truncate" title="{{ password.username }}">{{ password.username }}</td>
                             <td class="truncate" title="{{ password.email }}">{{ password.email }}</td>
+                            <td class="truncate" title="{{ password.url }}"><a href="{{ password.url }}" target="_blank">{{ password.url }}</a></td>
                             <td><span id="password-{{ password.id }}" class="decrypted-password">**********</span></td>
                             <td>
                                 <button type="button" class="btn btn-sm btn-info toggle-password-visibility" data-id="{{ password.id }}">View</button>
@@ -82,14 +84,14 @@
                             </td>
                         </tr>
                         <tr class="notes-row" id="notes-row-{{ password.id }}" style="display: none;">
-                            <td colspan="6">
+                            <td colspan="7">
                                 <strong>Notes:</strong>
                                 <p id="notes-content-{{ password.id }}"></p>
                             </td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td colspan="6">No passwords found.</td>
+                            <td colspan="7">No passwords found.</td>
                         </tr>
                         {% endfor %}
                     </tbody>

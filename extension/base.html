@@ -1,105 +1,231 @@
 <!doctype html>
 <html>
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>SaltVault</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-      body{ min-width:320px; padding:12px; }
-      .btn-group{ gap:.5rem; }
-      .section{ margin-bottom: 1rem; }
-    </style>
-  </head>
-  <body>
-    <div class="section">
-      <!DOCTYPE html>
-      <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SaltVault Extension</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-        <style>
-          body { background-color: #121212; color: #e0e0e0; }
-          .form-control, .list-group-item { background-color: #1e1e1e; color: #e0e0e0; border-color: #333; }
-          .btn { border-radius: 6px; }
-          .brand { display:flex; align-items:center; gap:8px; }
-          .brand img { width: 100px; height: 100px; }
-          .container.p-3 { font-size: 32px;}
-          .small.mb-1 { font-size: 14px; }
-        </style>
-        </head>
-      <body>
-        <div class="container p-3" style="min-width:320px;max-width:400px;">
-          <div class="brand mb-2">
-            <img src="salt_vault_icon.png" alt="SaltVault">
-            <strong>SaltVault</strong>
-          </div>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SaltVault Extension</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body { 
+      position: relative;
+      min-width: 380px; 
+      max-width: 400px;
+      padding: 12px;
+      background-color: #121212; 
+      color: #e0e0e0; 
+      overflow: hidden;
+    }
+    .form-control, .list-group-item { 
+      background-color: #1e1e1e; 
+      color: #e0e0e0; 
+      border-color: #333; 
+    }
+    .btn { 
+      border-radius: 6px; 
+    }
+    hr {
+      border-top: 1px solid #333;
+    }
 
-          <div class="form-row">
-            <div class="col">
-              <label for="baseUrl" class="small mb-1">Base URL</label>
-              <input type="url" id="baseUrl" class="form-control form-control-sm" placeholder="http://localhost:5000">
-            </div>
-            <div class="col-auto align-self-end">
-              <button id="saveBaseUrl" class="btn btn-secondary btn-sm">Save</button>
-            </div>
-          </div>
+    #watermark {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 80%;
+      background-image: url('salt_vault_repo_logo.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      opacity: 0.05;
+      z-index: -1;
+      display: none; /* Hidden by default */
+    }
 
-          <div class="form-row mt-2">
-            <div class="col">
+    /* Pre-login styles */
+    #preLoginHeader .brand-text {
+      font-size: 36px;
+      font-weight: bold;
+      text-align: center;
+      display: block;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    #loginSection {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 200px; /* Give it some height for the logo */
+      background-color: #1a1a1a; /* Dark background to blend with logo if needed */
+      border-radius: .375rem;
+      padding: 1rem;
+      overflow: hidden; /* Hide overflow from logo */
+    }
+    #preLoginLogo {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('salt_vault_repo_logo.png');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      opacity: 0.1; /* Transparent */
+      z-index: 0; /* Behind other content */
+    }
+    #loginSection .login-form-container {
+      position: relative; /* To be above the logo */
+      z-index: 1;
+      background-color: rgba(18, 18, 18, 0.8); /* Semi-transparent background for readability */
+      padding: 1rem;
+      border-radius: .375rem;
+      width: 100%; /* Take full width within loginSection */
+    }
+    
+    /* Modern Alert Styles */
+    .alert {
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      border: 1px solid transparent;
+      border-radius: .375rem;
+      font-size: 0.9rem;
+      background-color: #2a2a2a;
+      border-color: #444;
+    }
+    .alert-success { color: #a0e8a0; background-color: #2a2a2a; border-color: #3c763d; }
+    .alert-danger { color: #e8a0a0; background-color: #2a2a2a; border-color: #a94442; }
+    .alert-info { color: #a0c8e8; background-color: #2a2a2a; border-color: #31708f; }
+
+    /* Dropdown focus style */
+    #actionSelector:focus {
+      border-color: #555;
+      box-shadow: 0 0 0 0.2rem rgba(68, 68, 68, 0.25);
+      background-color: #333;
+      color: #eee;
+    }
+  </style>
+</head>
+<body>
+  <div id="watermark"></div>
+  <div class="container p-3">
+    
+    <div id="preLoginHeader">
+      <span class="brand-text">SaltVault</span>
+    </div>
+
+    <div id="statusBox" class="alert" role="alert" style="display:none;"></div>
+
+    <div id="loginSection">
+      <div id="preLoginLogo"></div>
+      <div class="login-form-container">
+        <div class="form-row" id="baseUrlRow">
+          <div class="col">
+            <label for="baseUrl" class="small mb-1">Base URL</label>
+            <input type="url" id="baseUrl" class="form-control form-control-sm" placeholder="http://localhost:5000">
+          </div>
+          <div class="col" style="max-width: max-content; align-self: flex-end;">
+            <button id="saveBaseUrl" class="btn btn-secondary btn-sm">Save</button>
+          </div>
+        </div>
+        <div class="form-row mt-2" id="loginRow">
+            <div class="col-12 mb-2">
               <label for="username" class="small mb-1">Username</label>
               <input type="text" id="username" class="form-control form-control-sm" placeholder="username">
             </div>
-            <div class="col">
+            <div class="col-12 mb-2">
               <label for="master" class="small mb-1">Master Password</label>
               <input type="password" id="master" class="form-control form-control-sm" placeholder="••••••••">
             </div>
-              <div class="col-4">
-                <label for="username" class="small mb-1">Username</label>
-                <input type="text" id="username" class="form-control form-control-sm" placeholder="username">
-              </div>
-              <div class="col-4">
-                <label for="master" class="small mb-1">Master Password</label>
-                <input type="password" id="master" class="form-control form-control-sm" placeholder="••••••••">
-              </div>
-              <div class="col-3">
-                <label for="totp" class="small mb-1">TOTP</label>
-                <input type="text" id="totp" class="form-control form-control-sm" placeholder="123456">
-              </div>
-              <div class="col-auto align-self-end">
-                <button id="loginBtn" class="btn btn-primary btn-sm">Login</button>
-              </div>
-          </div>
-
-          <hr>
-          <div class="form-row">
-            <div class="col">
-              <label for="searchDomain" class="small mb-1">Search Domain</label>
-              <input type="text" id="searchDomain" class="form-control form-control-sm" placeholder="example.com">
+            <div class="col-12 mb-2">
+              <label for="totp" class="small mb-1">TOTP</label>
+              <input type="text" id="totp" class="form-control form-control-sm" placeholder="123456" size="6" maxlength="6">
             </div>
-            <div class="col-auto align-self-end">
-              <button id="listBtn" class="btn btn-outline-light btn-sm">List</button>
+            <div class="col-12">
+              <button id="loginBtn" class="btn btn-primary btn-block btn-sm">Login</button>
             </div>
-          </div>
-          <ul id="results" class="list-group list-group-flush mt-2"></ul>
-
-          <hr>
-          <h6 class="mt-2">Add Password</h6>
-          <div class="form-row">
-            <div class="col-6 mb-1"><input id="addTitle" class="form-control form-control-sm" placeholder="Title"></div>
-            <div class="col-6 mb-1"><input id="addUsername" class="form-control form-control-sm" placeholder="Username"></div>
-            <div class="col-6 mb-1"><input id="addPassword" class="form-control form-control-sm" placeholder="Password"></div>
-            <div class="col-6 mb-1"><input id="addUrl" class="form-control form-control-sm" placeholder="URL (https://…)"></div>
-            <div class="col-12 mb-2"><input id="addNotes" class="form-control form-control-sm" placeholder="Notes"></div>
-          </div>
-          <div class="d-flex">
-            <button id="addBtn" class="btn btn-success btn-sm">Add</button>
-            <button id="autofillBtn" class="btn btn-info btn-sm ml-2">Autofill This Site</button>
-          </div>
         </div>
+      </div>
+    </div>
 
-        <script src="popup.js"></script>
-        </body>
-      </html>
+    <div id="mainContent" style="display:none;">
+      <div class="d-flex align-items-center mb-2">
+        <h6 class="mb-0">SaltVault</h6>
+        <button id="logoutBtn" class="btn btn-danger btn-sm ml-auto">Logout</button>
+      </div>
+      <hr>
+      <div class="form-row">
+        <div class="col">
+          <label for="searchDomain" class="small mb-1">Search Domain</label>
+          <input type="text" id="searchDomain" class="form-control form-control-sm" placeholder="example.com">
+        </div>
+        <div class="col-auto align-self-end">
+          <button id="listBtn" class="btn btn-outline-light btn-sm">List</button>
+        </div>
+      </div>
+      <ul id="results" class="list-group list-group-flush mt-2"></ul>
+      <hr>
+      <div class="form-group">
+        <label for="actionSelector" class="small mb-1">Action</label>
+        <select id="actionSelector" class="form-control form-control-sm">
+          <option value="add" selected>Add Password</option>
+          <option value="edit">Edit Password</option>
+          <option value="view">View Passwords</option>
+        </select>
+      </div>
+
+      <div id="addPasswordContainer">
+        <div class="form-row">
+          <div class="col-12 mb-1"><input id="addTitle" class="form-control form-control-sm" placeholder="Title"></div>
+          <div class="col-12 mb-1"><input id="addUsername" class="form-control form-control-sm" placeholder="Username"></div>
+          <div class="col-12 mb-1"><input id="addPassword" class="form-control form-control-sm" placeholder="Password"></div>
+          <div class="col-12 mb-1"><input id="addEmail" class="form-control form-control-sm" placeholder="Email"></div>
+          <div class="col-12 mb-1"><input id="addUrl" class="form-control form-control-sm" placeholder="URL"></div>
+          <div class="col-12 mb-2"><input id="addNotes" class="form-control form-control-sm" placeholder="Notes"></div>
+        </div>
+        <div class="d-flex">
+          <button id="addBtn" class="btn btn-success btn-sm">Add</button>
+        </div>
+      </div>
+
+      <div id="editPasswordContainer" style="display:none;">
+        <p class="small text-muted">Select a password from the list above to edit.</p>
+        <!-- Form for editing will be injected here -->
+      </div>
+
+      <div id="viewPasswordsContainer" style="display:none; max-height: 200px; overflow-y: auto;">
+        <!-- Password list for viewing will be dynamically generated here -->
+      </div>
+
+      <hr>
+      <div class="form-group">
+        <label class="small mb-1">Autofill Settings</label>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="autofillSetting" id="autofillAuto" value="auto">
+          <label class="form-check-label small" for="autofillAuto">
+            Automatically autofill on page load.
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="autofillSetting" id="autofillAsk" value="ask">
+          <label class="form-check-label small" for="autofillAsk">
+            Ask to autofill on page load.
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="autofillSetting" id="autofillOff" value="off">
+          <label class="form-check-label small" for="autofillOff">
+            Do not autofill on page load.
+          </label>
+        </div>
+      </div>
+      <button id="autofillBtn" class="btn btn-info btn-sm mt-2">Autofill This Site</button>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

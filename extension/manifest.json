@@ -5,7 +5,7 @@
   "manifest_version": 3,
   "action": {
     "default_popup": "base.html",
-    "default_icon": "salt_vault_icon.png"
+    "default_icon": "salt_vault_repo_logo.png"
   },
   "background": {
     "service_worker": "background.js"

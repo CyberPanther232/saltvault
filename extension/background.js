@@ -19,6 +19,17 @@ async function fetchWithCred(path, options = {}) {
   return resp;
 }
 
+async function postJson(path, payload) {
+	const base = await getBaseUrl();
+	const res = await fetch(`${base}${path}`, {
+		method: 'POST',
+		credentials: 'include',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify(payload || {})
+	});
+	return res.json();
+}
+
 // Login to SaltVault using master password (assumes form-based auth at /login)
 async function loginMasterPassword({ username, password, totp, backup_code }) {
   const base = await getBaseUrl();
@@ -59,10 +70,10 @@ async function getPassword({ id }) {
 }
 
 // Add password entry
-async function addPassword({ title, username, password, url, notes }) {
+async function addPassword({ title, username, password, email, url, notes }) {
   const resp = await fetchWithCred('/api/add-password', {
     method: 'POST',
-    body: JSON.stringify({ title, username, password, url, notes }),
+    body: JSON.stringify({ title, username, password, email, url, notes }),
   });
   if (resp.ok) {
     const data = await resp.json().catch(() => ({}));
@@ -94,6 +105,7 @@ async function findCredentialsForDomain({ domain }) {
 
 // Message router
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  console.log(msg);
   (async () => {
     try {
       switch (msg.type) {
@@ -103,7 +115,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           break;
         }
         case 'loginMaster': {
-          const res = await loginMasterPassword({ username: msg.username, password: msg.password });
+          const res = await loginMasterPassword({ username: msg.username, password: msg.password, totp: msg.totp });
           sendResponse(res);
           break;
         }
@@ -127,6 +139,31 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           sendResponse(res);
           break;
         }
+        case 'generate': {
+            const data = await postJson('/generate-password', msg.payload);
+            sendResponse({ ok: true, data });
+            break;
+        }
+        case 'strengthen': {
+            const data = await postJson('/strengthen-password', msg.payload);
+            sendResponse({ ok: true, data });
+            break;
+        }
+        case 'autofill': {
+            // Forward to content script
+            if (sender.tab && sender.tab.id) {
+                await chrome.tabs.sendMessage(sender.tab.id, { type: 'autofill', data: msg.payload });
+                sendResponse({ ok: true });
+            } else {
+                // Try active tab
+                const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+                if (tab) {
+                    await chrome.tabs.sendMessage(tab.id, { type: 'autofill', data: msg.payload });
+                    sendResponse({ ok: true });
+                } else sendResponse({ ok: false, error: 'No active tab' });
+            }
+            break;
+        }
         default:
           sendResponse({ ok: false, error: 'Unknown message type' });
       }
@@ -135,70 +172,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     }
   })();
   return true; // keep port open for async
-});
-// SaltVault Extension Background (Service Worker)
-// Configure your vault base URL (same origin as where you're logged in)
-const BASE_URL = (async () => {
-	const { baseUrl } = await chrome.storage.sync.get({ baseUrl: '' });
-	return baseUrl || 'https://vault.local'; // change if needed
-})();
-
-async function getBase() { return await BASE_URL; }
-
-async function postJson(path, payload) {
-	const base = await getBase();
-	const res = await fetch(`${base}${path}`, {
-		method: 'POST',
-		credentials: 'include',
-		headers: { 'Content-Type': 'application/json' },
-		body: JSON.stringify(payload || {})
-	});
-	return res.json();
-}
-
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-	(async () => {
-		try {
-			switch (msg.type) {
-				case 'generate': {
-					const data = await postJson('/generate-password', msg.payload);
-					sendResponse({ ok: true, data });
-					break;
-				}
-				case 'strengthen': {
-					const data = await postJson('/strengthen-password', msg.payload);
-					sendResponse({ ok: true, data });
-					break;
-				}
-				case 'save': {
-					// Optional: consider a dedicated API route; here we post form-like JSON
-					const data = await postJson('/add-password', msg.payload);
-					sendResponse({ ok: true, data });
-					break;
-				}
-				case 'autofill': {
-					// Forward to content script
-					if (sender.tab && sender.tab.id) {
-						await chrome.tabs.sendMessage(sender.tab.id, { type: 'autofill', data: msg.payload });
-						sendResponse({ ok: true });
-					} else {
-						// Try active tab
-						const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-						if (tab) {
-							await chrome.tabs.sendMessage(tab.id, { type: 'autofill', data: msg.payload });
-							sendResponse({ ok: true });
-						} else sendResponse({ ok: false, error: 'No active tab' });
-					}
-					break;
-				}
-				default:
-					sendResponse({ ok: false, error: 'Unknown message type' });
-			}
-		} catch (e) {
-			sendResponse({ ok: false, error: String(e) });
-		}
-	})();
-	return true; // keep channel open for async
 });
 
 // Optional: context menu to save current page credentials (placeholder)

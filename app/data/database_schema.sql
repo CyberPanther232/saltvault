@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS passwords (
     username TEXT NOT NULL,
     password TEXT NOT NULL,
     email TEXT NOT NULL,
+    url TEXT,
     notes TEXT,
     FOREIGN KEY (user_id) REFERENCES users (id)
 );

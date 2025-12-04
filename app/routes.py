@@ -214,7 +214,7 @@ def index_route():
     # Search params
     query = request.args.get('q', '').strip()
     fields_param = request.args.get('fields', '').strip()
-    allowed_fields = {'title', 'username', 'email', 'notes'}
+    allowed_fields = {'title', 'username', 'email', 'url', 'notes'}
     active_fields = [f for f in fields_param.split(',') if f in allowed_fields]
     if query and not active_fields:
         # Default to all if user provided query but no fields
@@ -227,12 +227,14 @@ def index_route():
             dec_title = decrypt_data(key, p['title'])
             dec_username = decrypt_data(key, p['username'])
             dec_email = decrypt_data(key, p['email'])
+            dec_url = decrypt_data(key, p['url']) if 'url' in p.keys() and p['url'] else ''
             dec_notes = decrypt_data(key, p['notes']) if p['notes'] else ''
             record = {
                 'id': p['id'],
                 'title': dec_title,
                 'username': dec_username,
                 'email': dec_email,
+                'url': dec_url,
                 'notes': dec_notes,
                 'password': '**********'
             }
@@ -563,12 +565,13 @@ def add_password():
             encrypted_title = encrypt_data(key, request.form['title']).hex()
             encrypted_username = encrypt_data(key, request.form['username']).hex()
             encrypted_password = encrypt_data(key, request.form['password']).hex()
-            encrypted_email = encrypt_data(key, request.form['email']).hex()
-            encrypted_notes = encrypt_data(key, request.form['notes']).hex() if request.form['notes'] else None
+            encrypted_email = encrypt_data(key, request.form.get('email', '')).hex()
+            encrypted_url = encrypt_data(key, request.form.get('url', '')).hex()
+            encrypted_notes = encrypt_data(key, request.form.get('notes', '')).hex()
             
             db = get_db()
-            db.execute('INSERT INTO passwords (user_id, title, username, password, email, notes) VALUES (?, ?, ?, ?, ?, ?)',
-                       (current_user.id, encrypted_title, encrypted_username, encrypted_password, encrypted_email, encrypted_notes))
+            db.execute('INSERT INTO passwords (user_id, title, username, password, email, url, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                       (current_user.id, encrypted_title, encrypted_username, encrypted_password, encrypted_email, encrypted_url, encrypted_notes))
             db.commit()
             log_event('PASSWORD_ADDED', f'User {current_user.username} added a new password entry titled {request.form["title"]}', severity='INFO')
             flash('Password added successfully.', 'success')
@@ -617,7 +620,7 @@ def api_list_passwords():
         log_event('MISSING_KEY', 'Encryption key missing in session during API list-passwords', severity='ERROR')
         return jsonify({'error': 'Session expired'}), 401
     db = get_db()
-    rows = db.execute('SELECT id, title, username, email FROM passwords WHERE user_id = ?', (current_user.id,)).fetchall()
+    rows = db.execute('SELECT id, title, username, email, url FROM passwords WHERE user_id = ?', (current_user.id,)).fetchall()
     items = []
     for r in rows:
         try:
@@ -625,7 +628,8 @@ def api_list_passwords():
                 'id': r['id'],
                 'title': decrypt_data(key, r['title']),
                 'username': decrypt_data(key, r['username']),
-                'url': decrypt_data(key, r['email'])
+                'email': decrypt_data(key, r['email']),
+                'url': decrypt_data(key, r['url']) if 'url' in r.keys() and r['url'] else ''
             })
         except Exception:
             continue
@@ -658,6 +662,7 @@ def edit_password(password_id):
             'title': decrypt_data(key, p_data['title']),
             'username': decrypt_data(key, p_data['username']),
             'email': decrypt_data(key, p_data['email']),
+            'url': decrypt_data(key, p_data['url']) if 'url' in p_data.keys() and p_data['url'] else '',
             'notes': decrypt_data(key, p_data['notes']) if p_data['notes'] else ''
         }
     except Exception:
@@ -669,16 +674,17 @@ def edit_password(password_id):
         try:
             new_title = encrypt_data(key, request.form['title']).hex()
             new_username = encrypt_data(key, request.form['username']).hex()
-            new_email = encrypt_data(key, request.form['email']).hex()
-            new_notes = encrypt_data(key, request.form['notes']).hex() if request.form['notes'] else None
+            new_email = encrypt_data(key, request.form.get('email', '')).hex()
+            new_url = encrypt_data(key, request.form.get('url', '')).hex()
+            new_notes = encrypt_data(key, request.form.get('notes', '')).hex()
             
             if request.form.get('password'):
                 new_password = encrypt_data(key, request.form['password']).hex()
-                db.execute('UPDATE passwords SET title=?, username=?, password=?, email=?, notes=? WHERE id=?',
-                           (new_title, new_username, new_password, new_email, new_notes, password_id))
+                db.execute('UPDATE passwords SET title=?, username=?, password=?, email=?, url=?, notes=? WHERE id=?',
+                           (new_title, new_username, new_password, new_email, new_url, new_notes, password_id))
             else:
-                db.execute('UPDATE passwords SET title=?, username=?, email=?, notes=? WHERE id=?',
-                           (new_title, new_username, new_email, new_notes, password_id))
+                db.execute('UPDATE passwords SET title=?, username=?, email=?, url=?, notes=? WHERE id=?',
+                           (new_title, new_username, new_email, new_url, new_notes, password_id))
             db.commit()
             log_event('PASSWORD_EDITED', f'User {current_user.username} edited password ID {password_id}', severity='INFO')
             flash('Password updated successfully.', 'success')
@@ -828,7 +834,7 @@ def export_passwords():
     # Create CSV
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(['name', 'login_username', 'login_password', 'login_uri', 'notes'])
+    writer.writerow(['name', 'login_username', 'login_password', 'login_uri', 'login_url', 'notes'])
 
     for p in encrypted_passwords:
         try:
@@ -837,6 +843,7 @@ def export_passwords():
                 decrypt_data(key, p['username']),
                 decrypt_data(key, p['password']),
                 decrypt_data(key, p['email']),
+                decrypt_data(key, p['url']) if 'url' in p.keys() and p['url'] else '',
                 decrypt_data(key, p['notes']) if p['notes'] else ''
             ])
         except Exception:
@@ -927,14 +934,16 @@ def import_passwords():
             username = row.get('login_username', '')
             password_val = row.get('login_password', '')
             email_or_uri = row.get('login_uri', '')
+            url = row.get('login_url', '')
             notes = row.get('notes', '')
             enc_title = encrypt_data(key, title).hex()
             enc_username = encrypt_data(key, username).hex()
             enc_password = encrypt_data(key, password_val).hex()
             enc_email = encrypt_data(key, email_or_uri).hex()
+            enc_url = encrypt_data(key, url).hex()
             enc_notes = encrypt_data(key, notes).hex() if notes else None
-            db.execute('INSERT INTO passwords (user_id, title, username, password, email, notes) VALUES (?, ?, ?, ?, ?, ?)',
-                       (current_user.id, enc_title, enc_username, enc_password, enc_email, enc_notes))
+            db.execute('INSERT INTO passwords (user_id, title, username, password, email, url, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                       (current_user.id, enc_title, enc_username, enc_password, enc_email, enc_url, enc_notes))
             row_count += 1
         if row_count == 0:
             flash('No rows found in CSV.', 'warning')
@@ -1261,12 +1270,13 @@ def api_add_password():
         encrypted_title = encrypt_data(key, request.json['title']).hex()
         encrypted_username = encrypt_data(key, request.json['username']).hex()
         encrypted_password = encrypt_data(key, request.json['password']).hex()
-        encrypted_email = encrypt_data(key, request.json['email']).hex()
-        encrypted_notes = encrypt_data(key, request.json['notes']).hex() if request.json.get('notes') else None
+        encrypted_email = encrypt_data(key, request.json.get('email', '')).hex()
+        encrypted_url = encrypt_data(key, request.json.get('url', '')).hex()
+        encrypted_notes = encrypt_data(key, request.json.get('notes', '')).hex()
         
         db = get_db()
-        db.execute('INSERT INTO passwords (user_id, title, username, password, email, notes) VALUES (?, ?, ?, ?, ?, ?)',
-                   (current_user.id, encrypted_title, encrypted_username, encrypted_password, encrypted_email, encrypted_notes))
+        db.execute('INSERT INTO passwords (user_id, title, username, password, email, url, notes) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                   (current_user.id, encrypted_title, encrypted_username, encrypted_password, encrypted_email, encrypted_url, encrypted_notes))
         db.commit()
         log_event('API_PASSWORD_ADDED', f'User {current_user.username} added a new password entry via API titled {request.json["title"]}', severity='INFO')
         return jsonify({'status': 'Password added successfully.'}), 201
