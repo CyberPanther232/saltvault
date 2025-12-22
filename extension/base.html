@@ -122,6 +122,15 @@
     <div id="loginSection">
       <div id="preLoginLogo"></div>
       <div class="login-form-container">
+        <div class="form-row" id="baseUrlRow">
+          <div class="col">
+            <label for="baseUrl" class="small mb-1">Base URL</label>
+            <input type="url" id="baseUrlLogin" class="form-control form-control-sm" placeholder="http://localhost:5000">
+          </div>
+          <div class="col" style="max-width: max-content; align-self: flex-end;">
+            <button id="saveBaseUrlLogin" class="btn btn-secondary btn-sm">Save</button>
+          </div>
+        </div>
         <div class="form-row mt-2" id="loginRow">
             <div class="col-12 mb-2">
               <label for="username" class="small mb-1">Username</label>

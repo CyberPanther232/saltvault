@@ -24,23 +24,31 @@
   }
 
   async function checkSessionState() {
-    // Check for Base URL and Session Duration
-    const { baseUrl, sessionDuration } = await chrome.storage.sync.get(['baseUrl', 'sessionDuration']);
-    if (baseUrl) {
-      const el = $('#baseUrl');
-      if (el) el.value = baseUrl;
-    }
+    const { loginSession } = await chrome.storage.local.get(['loginSession']);
+    const { sessionDuration, baseUrl } = await chrome.storage.sync.get(['sessionDuration', 'baseUrl']);
+
     if (sessionDuration) {
-      const el = $('#sessionDuration');
-      if (el) el.value = sessionDuration;
       SESSION_DURATION = sessionDuration * 60 * 1000;
     }
 
+    if (baseUrl) {
+      const el = $('#baseUrl');
+      if (el) el.value = baseUrl;
+      const elLogin = $('#baseUrlLogin');
+      if (elLogin) elLogin.value = baseUrl;
+    }
 
-    // Check for login session
-    const { loginSession } = await chrome.storage.local.get(['loginSession']);
     if (loginSession && loginSession.loggedIn && (Date.now() - loginSession.timestamp < SESSION_DURATION)) {
       updateUIMode(true);
+      const { baseUrl, sessionDuration } = await chrome.storage.sync.get(['baseUrl', 'sessionDuration']);
+      if (baseUrl) {
+        const el = $('#baseUrl');
+        if (el) el.value = baseUrl;
+      }
+      if (sessionDuration) {
+        const el = $('#sessionDuration');
+        if (el) el.value = sessionDuration;
+      }
     } else {
       updateUIMode(false);
     }
@@ -54,7 +62,11 @@
   }
 
   function onSaveBaseUrl() {
-    const baseUrl = ($('#baseUrl').value || '').trim();
+    let baseUrl = ($('#baseUrl').value || '').trim();
+    if (!baseUrl) {
+      baseUrl = ($('#baseUrlLogin').value || '').trim();
+    }
+
     if (!baseUrl) {
       showStatus('Base URL cannot be empty', 'danger');
       return;
@@ -62,6 +74,10 @@
     chrome.runtime.sendMessage({ type: 'setBaseUrl', baseUrl }, (res) => {
       if (res && res.ok) {
         showStatus('Base URL saved', 'success');
+        const el = $('#baseUrl');
+        if (el) el.value = baseUrl;
+        const elLogin = $('#baseUrlLogin');
+        if (elLogin) elLogin.value = baseUrl;
       } else {
         showStatus(`Failed to save URL${res && res.error ? ': ' + res.error : ''}`, 'danger');
       }
@@ -89,12 +105,21 @@
     if (m) m.value = '';
     if (t) t.value = '';
 
-    chrome.runtime.sendMessage({ type: 'loginMaster', username, password, totp }, (res) => {
+    chrome.runtime.sendMessage({ type: 'loginMaster', username, password, totp }, async (res) => {
       if (res && res.ok) {
         showStatus('Logged in successfully', 'success');
         const session = { loggedIn: true, timestamp: Date.now() };
         chrome.storage.local.set({ loginSession: session });
         updateUIMode(true);
+        const { baseUrl, sessionDuration } = await chrome.storage.sync.get(['baseUrl', 'sessionDuration']);
+        if (baseUrl) {
+          const el = $('#baseUrl');
+          if (el) el.value = baseUrl;
+        }
+        if (sessionDuration) {
+          const el = $('#sessionDuration');
+          if (el) el.value = sessionDuration;
+        }
       } else {
         showStatus(`Login failed${res && res.error ? ': ' + res.error : ''}`, 'danger');
         updateUIMode(false);
@@ -178,7 +203,7 @@
       // Placeholder text, full implementation is pending
       $('#editPasswordContainer').innerHTML = '<p class="small text-muted">Edit functionality is not yet implemented.</p>';
     } else if (selected === 'view') {
-      $('#viewPasswordsContainer')..style.display = 'block';
+      $('#viewPasswordsContainer').style.display = 'block';
       renderViewPasswords();
     }
   }
@@ -271,6 +296,7 @@
 
   function bindEvents() {
     $('#saveBaseUrl')?.addEventListener('click', onSaveBaseUrl);
+    $('#saveBaseUrlLogin')?.addEventListener('click', onSaveBaseUrl);
     $('#saveSessionDuration')?.addEventListener('click', onSaveSessionDuration);
     $('#loginBtn')?.addEventListener('click', onLogin);
     $('#logoutBtn')?.addEventListener('click', onLogout);
