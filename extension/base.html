@@ -217,8 +217,18 @@
       </div>
 
       <div id="editPasswordContainer" style="display:none;">
-        <p class="small text-muted">Select a password from the list above to edit.</p>
-        <!-- Form for editing will be injected here -->
+        <input type="hidden" id="editPasswordId">
+        <div class="form-row">
+          <div class="col-12 mb-1"><input id="editTitle" class="form-control form-control-sm" placeholder="Title"></div>
+          <div class="col-12 mb-1"><input id="editUsername" class="form-control form-control-sm" placeholder="Username"></div>
+          <div class="col-12 mb-1"><input id="editPassword" class="form-control form-control-sm" placeholder="Password"></div>
+          <div class="col-12 mb-1"><input id="editEmail" class="form-control form-control-sm" placeholder="Email"></div>
+          <div class="col-12 mb-1"><input id="editUrl" class="form-control form-control-sm" placeholder="URL"></div>
+          <div class="col-12 mb-2"><input id="editNotes" class="form-control form-control-sm" placeholder="Notes"></div>
+        </div>
+        <div class="d-flex">
+          <button id="updateBtn" class="btn btn-primary btn-sm">Update</button>
+        </div>
       </div>
 
       <div id="viewPasswordsContainer" style="display:none; max-height: 200px; overflow-y: auto;">

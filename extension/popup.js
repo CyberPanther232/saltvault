@@ -200,12 +200,22 @@
       $('#addPasswordContainer').style.display = 'block';
     } else if (selected === 'edit') {
       $('#editPasswordContainer').style.display = 'block';
-      // Placeholder text, full implementation is pending
-      $('#editPasswordContainer').innerHTML = '<p class="small text-muted">Edit functionality is not yet implemented.</p>';
     } else if (selected === 'view') {
       $('#viewPasswordsContainer').style.display = 'block';
       renderViewPasswords();
     }
+  }
+
+  function populateEditForm(item) {
+    $('#editPasswordId').value = item.id;
+    $('#editTitle').value = item.title || '';
+    $('#editUsername').value = item.username || '';
+    $('#editPassword').value = item.password || '';
+    $('#editEmail').value = item.email || '';
+    $('#editUrl').value = item.url || '';
+    $('#editNotes').value = item.notes || '';
+    $('#actionSelector').value = 'edit';
+    handleActionChange({ target: { value: 'edit' } });
   }
 
   function renderViewPasswords() {
@@ -232,22 +242,8 @@
         
         const titleSpan = document.createElement('span');
         titleSpan.textContent = item.title;
-        li.appendChild(titleSpan);
-
-        const btnGroup = document.createElement('div');
-        const copyUserBtn = document.createElement('button');
-        copyUserBtn.className = 'btn btn-outline-secondary btn-sm';
-        copyUserBtn.textContent = 'Copy User';
-        copyUserBtn.addEventListener('click', () => {
-          navigator.clipboard.writeText(item.username).then(() => {
-            showStatus(`Username for "${item.title}" copied`, 'success');
-          });
-        });
-
-        const copyPassBtn = document.createElement('button');
-        copyPassBtn.className = 'btn btn-outline-primary btn-sm ml-2';
-        copyPassBtn.textContent = 'Copy Pass';
-        copyPassBtn.addEventListener('click', () => {
+        titleSpan.style.cursor = 'pointer';
+        titleSpan.addEventListener('click', () => {
           chrome.runtime.sendMessage({ type: 'getPassword', id: item.id }, (det) => {
             if (det && det.ok) {
               navigator.clipboard.writeText(det.item.password).then(() => {
@@ -258,9 +254,17 @@
             }
           });
         });
+        li.appendChild(titleSpan);
 
-        btnGroup.appendChild(copyUserBtn);
-        btnGroup.appendChild(copyPassBtn);
+        const btnGroup = document.createElement('div');
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn btn-outline-secondary btn-sm';
+        editBtn.textContent = 'Edit';
+        editBtn.addEventListener('click', () => {
+          populateEditForm(item);
+        });
+
+        btnGroup.appendChild(editBtn);
         li.appendChild(btnGroup);
         ul.appendChild(li);
       });
@@ -294,6 +298,26 @@
     settingsSection.style.display = settingsSection.style.display === 'none' ? 'block' : 'none';
   }
 
+  function onEdit() {
+    const payload = {
+      id: ($('#editPasswordId').value || '').trim(),
+      title: ($('#editTitle').value || '').trim(),
+      username: ($('#editUsername').value || '').trim(),
+      password: $('#editPassword').value || '',
+      email: ($('#editEmail').value || '').trim(),
+      url: ($('#editUrl').value || '').trim(),
+      notes: ($('#editNotes').value || '').trim()
+    };
+    chrome.runtime.sendMessage({ type: 'editPassword', payload }, (res) => {
+      if (res && res.ok) {
+        showStatus('Password updated', 'success');
+        renderViewPasswords();
+      } else {
+        showStatus(`Update failed${res && res.error ? ': ' + res.error : ''}`, 'danger');
+      }
+    });
+  }
+
   function bindEvents() {
     $('#saveBaseUrl')?.addEventListener('click', onSaveBaseUrl);
     $('#saveBaseUrlLogin')?.addEventListener('click', onSaveBaseUrl);
@@ -303,6 +327,7 @@
     $('#settingsBtn')?.addEventListener('click', toggleSettings);
     $('#listBtn')?.addEventListener('click', onList);
     $('#addBtn')?.addEventListener('click', onAdd);
+    $('#updateBtn')?.addEventListener('click', onEdit);
     $('#actionSelector')?.addEventListener('change', handleActionChange);
     $('#autofillBtn')?.addEventListener('click', onAutofill);
     document.querySelectorAll('input[name="autofillSetting"]').forEach(radio => {

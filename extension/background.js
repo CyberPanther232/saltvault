@@ -79,7 +79,7 @@ async function addPassword({ title, username, password, email, url, notes }) {
     const data = await resp.json().catch(() => ({}));
     return { ok: true, item: data };
   }
-  return { ok: resp.ok };
+  return { ok: resp.ok, error: `Failed with status: ${resp.status}` };
 }
 
 // Helper: scrape minimal info from index HTML when JSON not available
@@ -103,41 +103,112 @@ async function findCredentialsForDomain({ domain }) {
   return det.ok ? { ok: true, item: det.item } : det;
 }
 
+// Edit password entry
+
+async function editPassword({ id, title, username, password, email, url, notes }) {
+
+  const resp = await fetchWithCred(`/api/edit-password/${id}`, {
+
+    method: 'POST',
+
+    body: JSON.stringify({ title, username, password, email, url, notes }),
+
+  });
+
+  if (resp.ok) {
+
+    const data = await resp.json().catch(() => ({}));
+
+    return { ok: true, item: data };
+
+  }
+
+  return { ok: resp.ok };
+
+}
+
+
+
 // Message router
+
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+
   console.log(msg);
+
   (async () => {
+
     try {
+
       switch (msg.type) {
+
         case 'setBaseUrl': {
+
           await chrome.storage.sync.set({ baseUrl: msg.baseUrl });
+
           sendResponse({ ok: true });
+
           break;
+
         }
+
         case 'loginMaster': {
+
           const res = await loginMasterPassword({ username: msg.username, password: msg.password, totp: msg.totp });
+
           sendResponse(res);
+
           break;
+
         }
+
         case 'listPasswords': {
+
           const res = await listPasswords({ domain: msg.domain });
+
           sendResponse(res);
+
           break;
+
         }
+
         case 'getPassword': {
+
           const res = await getPassword({ id: msg.id });
+
           sendResponse(res);
+
           break;
+
         }
+
         case 'addPassword': {
+
           const res = await addPassword(msg.payload || {});
+
           sendResponse(res);
+
           break;
+
         }
-        case 'findCredsForDomain': {
-          const res = await findCredentialsForDomain({ domain: msg.domain });
+
+        case 'editPassword': {
+
+          const res = await editPassword(msg.payload || {});
+
           sendResponse(res);
+
           break;
+
+        }
+
+        case 'findCredsForDomain': {
+
+          const res = await findCredentialsForDomain({ domain: msg.domain });
+
+          sendResponse(res);
+
+          break;
+
         }
         case 'generate': {
             const data = await postJson('/generate-password', msg.payload);
