@@ -122,15 +122,6 @@
     <div id="loginSection">
       <div id="preLoginLogo"></div>
       <div class="login-form-container">
-        <div class="form-row" id="baseUrlRow">
-          <div class="col">
-            <label for="baseUrl" class="small mb-1">Base URL</label>
-            <input type="url" id="baseUrl" class="form-control form-control-sm" placeholder="http://localhost:5000">
-          </div>
-          <div class="col" style="max-width: max-content; align-self: flex-end;">
-            <button id="saveBaseUrl" class="btn btn-secondary btn-sm">Save</button>
-          </div>
-        </div>
         <div class="form-row mt-2" id="loginRow">
             <div class="col-12 mb-2">
               <label for="username" class="small mb-1">Username</label>
@@ -154,9 +145,34 @@
     <div id="mainContent" style="display:none;">
       <div class="d-flex align-items-center mb-2">
         <h6 class="mb-0">SaltVault</h6>
-        <button id="logoutBtn" class="btn btn-danger btn-sm ml-auto">Logout</button>
+        <button id="settingsBtn" class="btn btn-secondary btn-sm ml-auto">Settings</button>
       </div>
       <hr>
+
+      <div id="settingsSection" style="display:none;">
+        <div class="form-row" id="baseUrlRow">
+          <div class="col">
+            <label for="baseUrl" class="small mb-1">Base URL</label>
+            <input type="url" id="baseUrl" class="form-control form-control-sm" placeholder="http://localhost:5000">
+          </div>
+          <div class="col" style="max-width: max-content; align-self: flex-end;">
+            <button id="saveBaseUrl" class="btn btn-secondary btn-sm">Save</button>
+          </div>
+        </div>
+        <div class="form-row mt-2" id="sessionDurationRow">
+            <div class="col">
+                <label for="sessionDuration" class="small mb-1">Session Duration (minutes)</label>
+                <input type="number" id="sessionDuration" class="form-control form-control-sm" placeholder="60">
+            </div>
+            <div class="col" style="max-width: max-content; align-self: flex-end;">
+                <button id="saveSessionDuration" class="btn btn-secondary btn-sm">Save</button>
+            </div>
+        </div>
+        <hr>
+        <button id="logoutBtn" class="btn btn-danger btn-sm ml-auto">Logout & Clear Settings</button>
+        <hr>
+      </div>
+
       <div class="form-row">
         <div class="col">
           <label for="searchDomain" class="small mb-1">Search Domain</label>

@@ -1,6 +1,6 @@
 (function() {
   const $ = (sel) => document.querySelector(sel);
-  const SESSION_DURATION = 3600 * 1000; // 1 hour in milliseconds
+  let SESSION_DURATION = 3600 * 1000; // 1 hour in milliseconds
 
   function showStatus(message, type = 'info') {
     const box = $('#statusBox');
@@ -18,18 +18,24 @@
     $('#loginSection').style.display = isLoggedIn ? 'none' : 'flex';
     $('#mainContent').style.display = isLoggedIn ? 'block' : 'none';
     $('#watermark').style.display = isLoggedIn ? 'block' : 'none';
+    if (!isLoggedIn) {
+      $('#settingsSection').style.display = 'none';
+    }
   }
 
   async function checkSessionState() {
-    // Check for Base URL
-    const { baseUrl } = await chrome.storage.sync.get(['baseUrl']);
+    // Check for Base URL and Session Duration
+    const { baseUrl, sessionDuration } = await chrome.storage.sync.get(['baseUrl', 'sessionDuration']);
     if (baseUrl) {
-      $('#baseUrlRow').style.display = 'none';
       const el = $('#baseUrl');
       if (el) el.value = baseUrl;
-    } else {
-       $('#baseUrlRow').style.display = 'flex';
     }
+    if (sessionDuration) {
+      const el = $('#sessionDuration');
+      if (el) el.value = sessionDuration;
+      SESSION_DURATION = sessionDuration * 60 * 1000;
+    }
+
 
     // Check for login session
     const { loginSession } = await chrome.storage.local.get(['loginSession']);
@@ -56,10 +62,21 @@
     chrome.runtime.sendMessage({ type: 'setBaseUrl', baseUrl }, (res) => {
       if (res && res.ok) {
         showStatus('Base URL saved', 'success');
-        $('#baseUrlRow').style.display = 'none';
       } else {
         showStatus(`Failed to save URL${res && res.error ? ': ' + res.error : ''}`, 'danger');
       }
+    });
+  }
+
+  function onSaveSessionDuration() {
+    const duration = parseInt($('#sessionDuration').value, 10);
+    if (isNaN(duration) || duration <= 0) {
+      showStatus('Invalid session duration', 'danger');
+      return;
+    }
+    chrome.storage.sync.set({ sessionDuration: duration }, () => {
+      SESSION_DURATION = duration * 60 * 1000;
+      showStatus('Session duration saved', 'success');
     });
   }
 
@@ -87,7 +104,8 @@
 
   function onLogout() {
     chrome.storage.local.remove('loginSession');
-    showStatus('Logged out', 'info');
+    chrome.storage.sync.remove(['baseUrl', 'sessionDuration']);
+    showStatus('Logged out and settings cleared', 'info');
     updateUIMode(false);
   }
 
@@ -160,7 +178,7 @@
       // Placeholder text, full implementation is pending
       $('#editPasswordContainer').innerHTML = '<p class="small text-muted">Edit functionality is not yet implemented.</p>';
     } else if (selected === 'view') {
-      $('#viewPasswordsContainer').style.display = 'block';
+      $('#viewPasswordsContainer')..style.display = 'block';
       renderViewPasswords();
     }
   }
@@ -246,10 +264,17 @@
     });
   }
 
+  function toggleSettings() {
+    const settingsSection = $('#settingsSection');
+    settingsSection.style.display = settingsSection.style.display === 'none' ? 'block' : 'none';
+  }
+
   function bindEvents() {
     $('#saveBaseUrl')?.addEventListener('click', onSaveBaseUrl);
+    $('#saveSessionDuration')?.addEventListener('click', onSaveSessionDuration);
     $('#loginBtn')?.addEventListener('click', onLogin);
     $('#logoutBtn')?.addEventListener('click', onLogout);
+    $('#settingsBtn')?.addEventListener('click', toggleSettings);
     $('#listBtn')?.addEventListener('click', onList);
     $('#addBtn')?.addEventListener('click', onAdd);
     $('#actionSelector')?.addEventListener('change', handleActionChange);
