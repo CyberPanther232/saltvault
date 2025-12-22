@@ -180,4 +180,4 @@ If you'd like to collaborate, review other work, or contact me for professional 
 
 ## License
 
-TBD
+GNU General Public License v3.0
